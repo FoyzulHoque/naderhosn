@@ -11,20 +11,8 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
-    return CupertinoPageScaffold(
-      child: Center(
-        child: Column(
-          children: [
-            Image.asset(
-              "assets/images/splash.png",
-              width: screenSize.width,
-              height: screenSize.height,
-            ),
-
-            //SizedBox(height: 20),
-          ],
-        ),
-      ),
+    return Stack(
+      children: [Image.asset("assets/images/splash.png", fit: BoxFit.cover)],
     );
   }
 }

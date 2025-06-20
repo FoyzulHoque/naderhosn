@@ -16,9 +16,9 @@ class CustomAppBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Image.asset(
-              "assets/images/left_arrow.png",
-              height: 50,
-              width: 50,
+              "assets/images/back_button2.png",
+              height: 60,
+              width: 60,
               fit: BoxFit.cover,
             ),
             Spacer(),
