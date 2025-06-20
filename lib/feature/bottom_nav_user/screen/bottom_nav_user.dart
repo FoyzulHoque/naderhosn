@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/const/nav_bar_images.dart';
-import 'package:naderhosn/feature/bottom_nav_user/controller/bottom_nav_bar_courier_controller.dart';
+import 'package:naderhosn/feature/bottom_nav_user/controller/bottom_nav_user_controller.dart';
+import 'package:naderhosn/feature/user/home/screen/home.dart';
 
-class BottomNavbarCourier extends StatelessWidget {
-  BottomNavbarCourier({super.key});
+class BottomNavbarUser extends StatelessWidget {
+  BottomNavbarUser({super.key});
 
   final BottomNavUserController controller = Get.put(BottomNavUserController());
 
   final List<Widget> pages = [
-    // CourierHome(),
-    // EarningsScreen(),
-    // CourierProfileScreen(),
+    HomeScreen(),
+    HomeScreen(),
+    HomeScreen(),
+    HomeScreen(),
   ];
 
   Future<bool> _onWillPop(BuildContext context) async {
-    // Show the exit confirmation dialog
     return (await showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -24,14 +25,12 @@ class BottomNavbarCourier extends StatelessWidget {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  // Close the dialog and return false (do not exit)
                   Navigator.of(context).pop(false);
                 },
                 child: Text('No'),
               ),
               TextButton(
                 onPressed: () {
-                  // Close the dialog and return true (exit)
                   Navigator.of(context).pop(true);
                 },
                 child: Text('Yes'),
@@ -39,7 +38,7 @@ class BottomNavbarCourier extends StatelessWidget {
             ],
           ),
         )) ??
-        false; // In case the dialog is closed without selecting an option, return false
+        false;
   }
 
   @override
@@ -67,16 +66,16 @@ class BottomNavbarCourier extends StatelessWidget {
                 ),
                 _buildNavItem(
                   index: 1,
-                  activeImage: NavBarImages.earning,
-                  passiveImage: NavBarImages.passEarning,
+                  activeImage: NavBarImages.actCalculate,
+                  passiveImage: NavBarImages.passCalculate,
                 ),
-                // _buildNavItem(
-                //   index: 2,
-                //   activeImage: NavBarImages.actRec,
-                //   passiveImage: NavBarImages.passRec,
-                // ),
                 _buildNavItem(
                   index: 2,
+                  activeImage: NavBarImages.actChat,
+                  passiveImage: NavBarImages.passChat,
+                ),
+                _buildNavItem(
+                  index: 3,
                   activeImage: NavBarImages.actprofile,
                   passiveImage: NavBarImages.passprofile,
                 ),

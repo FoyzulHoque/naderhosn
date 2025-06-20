@@ -1,131 +1,126 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
-import 'package:naderhosn/feature/user/home/screen/home.dart';
+import 'package:naderhosn/feature/auth/onboarding/controller/onboarding_controller.dart';
+import 'package:naderhosn/feature/auth/register/screen/register.dart';
 
-class MoodBoardSender extends StatefulWidget {
-  const MoodBoardSender({super.key});
-
-  @override
-  _MoodBoardState createState() => _MoodBoardState();
-}
-
-class _MoodBoardState extends State<MoodBoardSender> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
-
-  final List<String> imageList = [
-    "assets/images/onboard1.png",
-    "assets/images/onboard2.png",
-    "assets/images/onboard3.png",
-  ];
-
-  void _nextPage() {
-    if (_currentIndex < imageList.length - 1) {
-      _pageController.nextPage(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      print("Done pressed");
-      Get.to(() => HomeScreen());
-    }
-  }
+class OnboardingScreen extends StatelessWidget {
+  final OnboardingController controller = Get.put(OnboardingController());
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // PageView from image list
-            SizedBox(height: 20),
-            Align(
-              alignment: Alignment.topLeft,
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Image.asset(
-                  "assets/images/back_button.png",
-                  width: 50,
-                  height: 50,
-                ),
-              ),
-            ),
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: imageList.length,
-                onPageChanged: (index) {
-                  setState(() => _currentIndex = index);
-                },
-                itemBuilder: (context, index) {
-                  return Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(imageList[index], width: size.width * 0.9),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+      body: Stack(
+        children: [
+          PageView(
+            controller: controller.pageController,
+            onPageChanged: controller.onPageChanged,
+            children: [
+              OnboardingPage(image: "assets/images/onboard1.png"),
+              OnboardingPage(image: "assets/images/onboard2.png"),
+              OnboardingPage(image: "assets/images/onboard3.png"),
+            ],
+          ),
 
-            // Dot indicator and button
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
+          Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 30, right: 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Dot indicators
-                  Row(
-                    children: List.generate(imageList.length, (index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 4),
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _currentIndex == index
-                              ? Color(0xFF3BD85E)
-                              : Color(0xFFA5EDB5),
-                        ),
-                      );
-                    }),
-                  ),
-
-                  // Next / Done button
-                  ElevatedButton(
-                    onPressed: _nextPage,
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                  GestureDetector(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 10, top: 10),
+                      child: Image.asset(
+                        "assets/images/back_button.png",
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
                       ),
-                      backgroundColor: Color(0xFF3BD85E),
-                      elevation: 0,
                     ),
+                    onTap: () => Navigator.pop(context),
+                  ),
+                  GestureDetector(
+                    onTap: () => Get.to(() => RegisterScreen()),
                     child: Text(
-                      _currentIndex == imageList.length - 1
-                          ? "Get Started"
-                          : "Next",
+                      "Skip here",
                       style: globalTextStyle(
-                        color: Color(0xFF0E1011),
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.w500,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 30, left: 10, right: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Page indicator
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildIndicator(1),
+                      _buildIndicator(2),
+                      _buildIndicator(3),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: controller.onNextPage,
+                    child: Image.asset(
+                      "assets/images/next_button.png",
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildIndicator(int index) {
+    return Obx(() {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5),
+        child: Text(
+          index.toString(),
+          style: globalTextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: controller.currentPage.value + 1 == index
+                ? Colors.amber
+                : Colors.white60,
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class OnboardingPage extends StatelessWidget {
+  final String image;
+
+  const OnboardingPage({required this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [Image.asset(image, fit: BoxFit.cover)],
     );
   }
 }

@@ -63,7 +63,9 @@ dependencies:
   flutter_svg: ^2.1.0
   flutter_polyline_points: ^2.1.0
   dio: ^5.8.0+1
-
+  intro_slider: ^4.2.1
+  intl_phone_field: ^3.2.0
+   
 dev_dependencies:
   flutter_test:
     sdk: flutter

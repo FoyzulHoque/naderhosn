@@ -4,6 +4,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:naderhosn/core/shared_preference/shared_preferences_helper.dart';
+import 'package:naderhosn/feature/auth/onboarding/view/onboarding.dart';
 import 'package:naderhosn/feature/user/home/screen/home.dart';
 
 class SplashScreenController extends GetxController {
@@ -26,7 +27,7 @@ class SplashScreenController extends GetxController {
       // } else {
       //   Get.offAll(SignInPage());
       // }
-      Get.to(() => HomeScreen());
+      Get.to(() => OnboardingScreen());
     });
   }
 
