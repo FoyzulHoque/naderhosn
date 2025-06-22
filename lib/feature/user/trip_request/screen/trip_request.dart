@@ -4,10 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/user/choose_taxi/controler/choose_taxi_controller.dart';
+import 'package:naderhosn/feature/user/confirm_pickup/controler/confirm_pickup_controller.dart';
 import 'package:naderhosn/feature/user/home/controller/home_controller.dart';
 
-class ChooseTaxiScreen extends StatelessWidget {
-  final ChooseTaxiController controller = Get.put(ChooseTaxiController());
+class TripRequest extends StatelessWidget {
+  final ConfirmPickupController controller = Get.put(ConfirmPickupController());
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class ExpandedBottomSheet extends StatelessWidget {
     return DraggableScrollableSheet(
       initialChildSize: 0.24,
       minChildSize: 0.1,
-      maxChildSize: 0.7,
+      maxChildSize: 0.5,
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: const BoxDecoration(
@@ -85,7 +86,7 @@ class ExpandedBottomSheet extends StatelessWidget {
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    "Confirm details",
+                    "Trip requested ",
                     style: globalTextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -93,86 +94,65 @@ class ExpandedBottomSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                Divider(),
-
                 Align(
                   alignment: Alignment.center,
-                  child: Image.asset(
-                    "assets/images/car2.png",
-                    width: MediaQuery.of(context).size.width * 0.5,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Taxi",
-                      style: globalTextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  child: Text(
+                    "Finding drivers nearby ",
+                    style: globalTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey,
                     ),
-                    Text(
-                      "\$186.00",
-                      style: globalTextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  "3:09 .  6 min",
-                  style: globalTextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF777F8B),
                   ),
                 ),
-                Text(
-                  "Affordable eveyday rides",
-                  style: globalTextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF777F8B),
-                  ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Image.asset("assets/images/loading_indicator.png"),
                 ),
                 SizedBox(height: 10),
-                Divider(),
-                SizedBox(height: 10),
-                Text(
-                  "Payment method",
-                  style: globalTextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFEDEDF3).withOpacity(0.2),
+                    border: Border.all(width: 0.5),
+                    borderRadius: BorderRadius.circular(5),
                   ),
-                ),
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Image.asset(
-                      "assets/images/card.png",
-                      width: 45,
-                      height: 45,
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      "Add new card ",
-                      style: globalTextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Trip",
+                              style: globalTextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFf777F8B),
+                              ),
+                            ),
+                            Text(
+                              "Meet at the pick-up point for Rode No.12, North",
+                              style: globalTextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Spacer(),
-                    Icon(Icons.arrow_right_sharp),
-                  ],
-                ),
-                SizedBox(height: 20),
-                CustomButton(
-                  title: "Choose Taxi",
-                  borderColor: Colors.transparent,
-                  backgroundColor: Color(0xFFFFDC71),
-                  onPress: () {},
+                      Flexible(
+                        flex: 1,
+                        child: Image.asset(
+                          "assets/images/option_button.png",
+                          width: 60,
+                          height: 60,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
