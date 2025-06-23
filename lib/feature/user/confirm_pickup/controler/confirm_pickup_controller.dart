@@ -9,11 +9,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class ConfirmPickupController extends GetxController {
   var isBottomSheetOpen = false.obs;
   var isLoading = false.obs;
-  var markerPosition = LatLng(23.749341, 90.437213).obs; // Current marker (You)
-  var destinationPosition = LatLng(
-    23.749704,
-    90.430164,
-  ).obs; // Second marker (Destination)
+  var markerPosition = LatLng(23.749341, 90.437213).obs;
+  var destinationPosition = LatLng(23.749704, 90.430164).obs;
   var markerPosition2 = LatLng(23.752100, 90.436741).obs;
   var markerPosition3 = LatLng(23.749763, 90.438307).obs;
   var markerPosition4 = LatLng(23.748654, 90.436666).obs;
@@ -29,6 +26,17 @@ class ConfirmPickupController extends GetxController {
     color: Colors.blue,
     width: 5,
   ).obs;
+
+  var currentBottomSheet = 1.obs;
+  var selectedIndex = 0.obs;
+
+  void selectContainerEffect(int index) {
+    selectedIndex.value = index;
+  }
+
+  void changeSheet(int value) {
+    currentBottomSheet.value = value;
+  }
 
   @override
   void onInit() async {

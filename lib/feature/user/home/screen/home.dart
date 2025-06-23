@@ -47,20 +47,20 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          ExpandedBottomSheet(),
+          ExpandedBottomSheetHome(),
         ],
       ),
     );
   }
 }
 
-class ExpandedBottomSheet extends StatelessWidget {
-  const ExpandedBottomSheet({super.key});
+class ExpandedBottomSheetHome extends StatelessWidget {
+  const ExpandedBottomSheetHome({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.24,
+      initialChildSize: 0.15,
       minChildSize: 0.1,
       maxChildSize: 0.4,
       builder: (BuildContext context, ScrollController scrollController) {

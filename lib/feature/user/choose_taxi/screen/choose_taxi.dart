@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/user/choose_taxi/controler/choose_taxi_controller.dart';
+import 'package:naderhosn/feature/user/confirm_pickup/screen/confirm_pickup.dart';
 import 'package:naderhosn/feature/user/home/controller/home_controller.dart';
 
 class ChooseTaxiScreen extends StatelessWidget {
@@ -172,7 +173,9 @@ class ExpandedBottomSheet extends StatelessWidget {
                   title: "Choose Taxi",
                   borderColor: Colors.transparent,
                   backgroundColor: Color(0xFFFFDC71),
-                  onPress: () {},
+                  onPress: () {
+                    Get.to(() => ConfirmPickUpScreen());
+                  },
                 ),
               ],
             ),
