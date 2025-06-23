@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:naderhosn/feature/bottom_nav_user/screen/bottom_nav_user.dart';
 import 'package:naderhosn/feature/splash_screen/screen/splash_screen.dart';
+import 'package:naderhosn/feature/user/home/screen/home.dart';
 
 void main() {
   runApp(const MyApp());
