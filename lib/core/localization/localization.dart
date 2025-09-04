@@ -43,7 +43,7 @@
 //           "Sign_up": "Sign up",
 //           "Create_Account": "Create Account",
 //           "Fill_Your_Information_below_or_register_with_your_social_media":
-//               "Fill Your Information below or register with your social media",
+//               "Fill Your Information below or otp with your social media",
 //           "Create_passowrd": "Create passowrd",
 //           "Confirm _Passowrd": "Confirm_Passowrd",
 //           "Sign_Up": "Sign Up",

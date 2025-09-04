@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:naderhosn/feature/auth/register/screen/register.dart';
-import 'package:naderhosn/feature/user/home/screen/home.dart';
+import 'package:naderhosn/feature/auth/login/view/login_view.dart';
 
 class OnboardingController extends GetxController {
   var currentPage = 0.obs;
@@ -14,7 +13,7 @@ class OnboardingController extends GetxController {
         curve: Curves.ease,
       );
     } else {
-      Get.to(() => RegisterScreen());
+      Get.to(() => LoginView());
     }
   }
 

@@ -1,16 +1,12 @@
 import 'dart:convert';
-
 //import 'package:firebase_messaging/firebase_messaging.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-
 import 'package:get/get.dart';
-
 import 'package:http/http.dart' as http;
-import 'package:naderhosn/core/network_caller/endpoints.dart';
-import 'package:naderhosn/core/shared_preference/shared_preferences_helper.dart';
+import '../../../../core/network_caller/endpoints.dart';
+import '../../../../core/shared_preference/shared_preferences_helper.dart';
 
 class LoginController extends GetxController {
   var isChecked = false.obs;
