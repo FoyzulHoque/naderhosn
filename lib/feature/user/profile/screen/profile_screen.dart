@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
-import 'package:naderhosn/feature/auth/register/screen/register.dart';
-import 'package:naderhosn/feature/bottom_nav_user/screen/bottom_nav_user.dart';
+import 'package:naderhosn/feature/auth/login/view/login_view.dart';
 import 'package:naderhosn/feature/user/my_rides/screen/my_rides.dart';
 import 'package:naderhosn/feature/user/privacy_policy/screen/privacy_policy.dart';
 import 'package:naderhosn/feature/user/profile/widget/notification_widget.dart';
 import 'package:naderhosn/feature/user/profile/widget/profile_action_widgets.dart';
 import 'package:naderhosn/feature/user/profile/widget/profile_edit_screen.dart';
-import 'package:naderhosn/feature/user/profile/widget/select_car_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -213,7 +210,7 @@ class ProfileScreen extends StatelessWidget {
                 actionName: "Log out",
                 style: globalTextStyle(),
                 voidCallback: () {
-                  Get.to(() => RegisterScreen());
+                  Get.to(() => LoginView());
                 },
                 iconData: (Icons.arrow_forward_ios),
                 size: 18,

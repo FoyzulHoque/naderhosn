@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
+import 'package:naderhosn/feature/auth/login/view/login_view.dart';
 import 'package:naderhosn/feature/auth/onboarding/controller/onboarding_controller.dart';
-import 'package:naderhosn/feature/auth/register/screen/register.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final OnboardingController controller = Get.put(OnboardingController());
@@ -42,7 +42,7 @@ class OnboardingScreen extends StatelessWidget {
                     onTap: () => Navigator.pop(context),
                   ),
                   GestureDetector(
-                    onTap: () => Get.to(() => RegisterScreen()),
+                    onTap: () => Get.to(() => LoginView()),
                     child: Text(
                       "Skip here",
                       style: globalTextStyle(

@@ -1,182 +1,239 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:get/get.dart';
-import 'package:naderhosn/core/global_widegts/custom_text_field.dart';
-import 'package:naderhosn/core/style/global_text_style.dart';
-import 'package:naderhosn/feature/auth/forgot_pin/view/reset_pin_enter_seed_phrase.dart';
-import 'package:naderhosn/feature/auth/login/controller/login_controller.dart';
-import 'package:naderhosn/feature/auth/onboarding/controller/onboarding_controller.dart';
+
+import '../../../../core/global_widegts/custom_button.dart';
+import '../../../../core/style/global_text_style.dart';
+import '../../otp/screen/register_otp_verify.dart';
+import '../../user text editing controller/user_text_editing_controller.dart';
+import '../controller/login_controller.dart';
+import '../widget/backgroundimage.dart';
 
 class LoginView extends StatelessWidget {
   LoginView({super.key});
 
+  final UserTextEditingController adminTextEditingController =
+  Get.put(UserTextEditingController());
   final LoginController controller = Get.put(LoginController());
-  final OnboardingController onboardingController = Get.put(
-    OnboardingController(),
-  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
+      body: AuthBackgroundImage(
         child: Padding(
-          padding: const EdgeInsets.only(
-            top: 100,
-            bottom: 50,
-            left: 24,
-            right: 24,
-          ),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            //crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // App Logo
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4), // Add circular radius
-                child: Image.asset(
-                  "assets/icons/authicon.png", // Replace with actual logo asset
-                  height: 56,
+              const SizedBox(height: 80),
+              SizedBox(
+                height: 88,
+                width: 277,
+                child: Text(
+                  "Enter your phone \nnumber",
+                  style: globalTextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w600,
+                    lineHeight: 1.5,
+                    color: const Color(0xFF041020),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Welcome Text
-              Text(
-                "Welcome!",
-                style: globalTextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w600,
+              /// Phone input with country picker
+              Container(
+                height: 55,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F4),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Access your documents anytime, anywhere with AI-powered organization.",
-                style: globalTextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xff636F85),
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 50),
-              // Email/Phone Field using CustomTextField
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Enter Your PIN",
-                  style: globalTextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Password Field using CustomTextField
-              Obx(
-                () => CustomTextField(
-                  hintText: "Enter your password",
-                  controller: controller.passwordController,
-                  obscureText: controller.isPasswordHidden.value,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isPasswordHidden.value
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                    ),
-                    onPressed: () {
-                      controller.isPasswordHidden.value =
-                          !controller.isPasswordHidden.value;
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Forgot Password
-              Row(
-                children: [
-                  // Native Checkbox with Obx
-                  Obx(
-                    () => Checkbox(
-                      value: controller.isChecked.value,
-                      onChanged: (value) {
-                        controller.isChecked.value = value ?? false;
-                      },
-                      activeColor: Color(0xFF6056DD),
-                    ),
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    "Remember me",
-                    style: globalTextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  Spacer(),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Forgot password action
-                        Get.to(ResetPinEnterSeedPhrase());
-                      },
-                      child: Text(
-                        "Forgot PIN",
-                        style: globalTextStyle(
-                          color: Color(0xffFF6F61),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        width: 120,
+                        child: CountryCodePicker(
+                          onChanged: (code) {
+                            if (code.dialCode != null) {
+                              adminTextEditingController.countryCode.text =
+                              code.dialCode!;
+                              adminTextEditingController.selectedCountryCode =
+                                  code;
+                            }
+                          },
+                          initialSelection: 'US',
+                          favorite: const ['+1', 'BD', 'IN'],
+                          showCountryOnly: false,
+                          showOnlyCountryWhenClosed: false,
+                          alignLeft: false,
+                          showDropDownButton: true,
+                          showFlag: true,
+                          showFlagMain: true,
+                          flagWidth: 24,
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          searchDecoration: InputDecoration(
+                            hintText: 'Search country',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                          ),
+                          dialogTextStyle: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          dialogBackgroundColor: Colors.white,
+                          dialogSize: Size(
+                            MediaQuery.of(context).size.width * 0.9,
+                            MediaQuery.of(context).size.height * 0.7,
+                          ),
+                          showFlagDialog: true,
+                          flagDecoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 2,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
 
-              // CustomButton2(
-              //   title: 'Sign In',
-              //   onPress: () {
-              //     if (onboardingController.role.value == "SENDER") {
-              //       Get.offAll(BottomNavbar());
-              //     } else if (onboardingController.role.value == "COURIER") {
-              //       Get.offAll(BottomNavbarCourier());
-              //     } else {
-              //       Fluttertoast.showToast(msg: "Invalid Role!");
-              //     }
-
-              //     //controller.loginUser();
-              //   },
-              // ),
-              const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Don’t have an account?"),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to sign-up screen
-                      //Get.to(CreateAccountSceen());
-                    },
-                    child: Text(
-                      "Create Account",
-                      style: globalTextStyle(
-                        color: Color(0xff6056DD),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
+                    /// Phone number input
+                    Expanded(
+                      child: TextFormField(
+                        controller: adminTextEditingController.phone,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: "Enter phone number",
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// Continue button
+              CustomButton(
+                title: "Continue",
+                onPress: _loginApiHitButton,
+                backgroundColor: const Color(0xFFFFDC71),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// Or separator
+              Align(
+                alignment: Alignment.center,
+                child: SizedBox(
+                  height: 24,
+                  width: 327,
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 1,
+                        width: 144,
+                        decoration:
+                        const BoxDecoration(color: Color(0xFFEDEDF3)),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        "Or",
+                        style: globalTextStyle(
+                          fontSize: 14,
+                          color: const Color(0xFF8697AC),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Container(
+                        height: 1,
+                        width: 144,
+                        decoration:
+                        const BoxDecoration(color: Color(0xFFEDEDF3)),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// Google button
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  height: 56,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFEDEDF3),
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: Image.asset("assets/images/google.png"),
+                        ),
+                      ),
+                      const SizedBox(width: 25),
+                      Center(
+                        child: Text(
+                          "Continue with Google",
+                          style: globalTextStyle(
+                            fontSize: 16,
+                            color: const Color(0xFF041020),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  void _loginApiHitButton() async {
+    if (adminTextEditingController.countryCodeAndPhone == "+8801518493703") {
+      Get.to(() =>  OtpScreen());
+    }
   }
 }

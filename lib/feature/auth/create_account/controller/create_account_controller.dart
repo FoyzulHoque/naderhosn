@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -28,7 +29,7 @@ class CreateAccountController extends GetxController {
   }
 
   Future<void> createAccount() async {
-    final url = Uri.parse('${Urls.baseUrl}/users/register');
+    final url = Uri.parse('${Urls.baseUrl}/users/otp');
 
     try {
       EasyLoading.show(status: 'Loading...');
@@ -176,3 +177,4 @@ class CreateAccountController extends GetxController {
     }
   }
 }
+*/
