@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:naderhosn/feature/auth/user%20text%20editing%20controller/user_text_editing_controller.dart';
 import 'package:pinput/pinput.dart';
 import '../../../../core/global_widegts/custom_button.dart';
 import '../../../../core/style/global_text_style.dart';
 import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
 import '../../login/widget/backgroundimage.dart';
-import '../../user text editing controller/user_text_editing_controller.dart';
 
 class OtpScreen extends StatelessWidget {
   OtpScreen({super.key});

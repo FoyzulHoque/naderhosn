@@ -1,7 +1,5 @@
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';

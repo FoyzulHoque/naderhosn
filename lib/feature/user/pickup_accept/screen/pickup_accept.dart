@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:naderhosn/core/global_widegts/custom_button.dart';
-import 'package:naderhosn/core/style/global_text_style.dart';
-import 'package:naderhosn/feature/user/confirm_pickup/controler/confirm_pickup_controller.dart';
-import 'package:naderhosn/feature/user/confirm_pickup/widget/bottom_sheet5.dart';
 import 'package:naderhosn/feature/user/confirm_pickup/widget/bottom_sheet6.dart';
-import 'package:naderhosn/feature/user/home/controller/home_controller.dart';
 import 'package:naderhosn/feature/user/pickup_accept/controler/pickup_accept_controller.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class PickupAcceptScreen extends StatelessWidget {
   final PickupAcceptController controllerPickupAccept = Get.put(

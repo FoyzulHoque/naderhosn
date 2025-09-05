@@ -4,13 +4,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/user/confirm_pickup/controler/confirm_pickup_controller.dart';
-import 'package:naderhosn/feature/user/confirm_pickup/widget/bottom_sheet5.dart';
-import 'package:naderhosn/feature/user/confirm_pickup/widget/bottom_sheet6.dart';
 import 'package:naderhosn/feature/user/end_ride/controler/end_ride_controller.dart';
-import 'package:naderhosn/feature/user/home/controller/home_controller.dart';
-import 'package:naderhosn/feature/user/pickup_accept/controler/pickup_accept_controller.dart';
 import 'package:naderhosn/feature/user/ride_canceled/screen/ride_canceled.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class EndRideScreen extends StatelessWidget {
   final EndRideController controllerPickupAccept = Get.put(EndRideController());

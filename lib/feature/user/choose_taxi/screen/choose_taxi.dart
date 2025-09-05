@@ -5,7 +5,6 @@ import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/user/choose_taxi/controler/choose_taxi_controller.dart';
 import 'package:naderhosn/feature/user/confirm_pickup/screen/confirm_pickup.dart';
-import 'package:naderhosn/feature/user/home/controller/home_controller.dart';
 
 class ChooseTaxiScreen extends StatelessWidget {
   final ChooseTaxiController controller = Get.put(ChooseTaxiController());

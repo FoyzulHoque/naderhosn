@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
-import 'package:naderhosn/feature/user/choose_taxi/controler/choose_taxi_controller.dart';
 import 'package:naderhosn/feature/user/confirm_pickup/controler/confirm_pickup_controller.dart';
-import 'package:naderhosn/feature/user/home/controller/home_controller.dart';
 
 class TripRequest extends StatelessWidget {
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());

@@ -4,9 +4,7 @@ import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/bottom_nav_user/screen/bottom_nav_user.dart';
-import 'package:naderhosn/feature/user/choose_taxi/screen/choose_taxi.dart';
 import 'package:naderhosn/feature/user/cost_calculate/controller/cost_calculate_controller.dart';
-import 'package:naderhosn/feature/user/cost_calculate/screen/cost_calculate.dart';
 
 class CostCalculateLocation extends StatelessWidget {
   CostCalculateLocation({super.key});

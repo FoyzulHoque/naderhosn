@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/feature/user/profile/widget/profile_image.dart';
 

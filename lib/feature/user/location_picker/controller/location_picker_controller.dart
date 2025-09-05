@@ -1,15 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_google_maps_webservices/places.dart' as places;
-import 'package:flutter_google_maps_webservices/places.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LocationPickerController extends GetxController {
   final String apiKey = 'AIzaSyATkpZxtsIVek6xHnGRsse_i4yVEofqQbI';
