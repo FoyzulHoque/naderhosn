@@ -4,7 +4,7 @@ import 'package:naderhosn/feature/auth/user%20text%20editing%20controller/user_t
 import 'package:pinput/pinput.dart';
 import '../../../../core/global_widegts/custom_button.dart';
 import '../../../../core/style/global_text_style.dart';
-import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
+import '../../add location/screen/screen.dart';
 import '../../login/widget/backgroundimage.dart';
 
 class OtpScreen extends StatelessWidget {
@@ -189,7 +189,7 @@ class OtpScreen extends StatelessWidget {
   void _otpApiHitButton() {
     focusNode.unfocus();
     if(adminTextEditingController.otp.text=="1234"){
-      Get.to(BottomNavbarUser());
+      Get.to(AddLocationScreen());
     }
   }
 }

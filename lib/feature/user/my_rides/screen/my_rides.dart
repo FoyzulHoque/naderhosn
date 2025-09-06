@@ -5,6 +5,9 @@ import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/user/my_rides/controller/my_rides_controller.dart';
 
+import '../widget/ride_history_tab2.dart';
+import '../widget/ride_history_tap.dart';
+
 class MyRides extends StatelessWidget {
   MyRides({super.key});
 
@@ -75,7 +78,33 @@ class MyRides extends StatelessWidget {
                     ),
                     Expanded(
                       child: TabBarView(
-                        children: [RideHistoryTab(), RideHistoryTab2()],
+                        children: [
+                          RideHistoryTab(
+                            imagePersion: "assets/icons/user (2).png",
+                            textPersion: "Justin Westervelt",
+                            imagelocation1: "assets/icons/Frame.png",
+                            textlocation1: "El-Baght Food Resmourants",
+                            imagelocation2: "assets/icons/location-08 (4).png",
+                            textlocation2: "El-Baght Food Resmourants",
+                            pricing: "120",
+                          ),
+
+                          RideHistoryTab2(
+                            buttonColor: Color(0xFFFFDC71),
+                            buttonText:"Done (2-2-21" ,
+                            widget: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: RideHistoryTab(
+                                imagePersion: "assets/icons/user (2).png",
+                                textPersion: "Justin Westervelt",
+                                imagelocation1: "assets/icons/Frame.png",
+                                textlocation1: "El-Baght Food Restaurants",
+                                imagelocation2: "assets/icons/location-08 (4).png",
+                                textlocation2: "Downtown City Mall",
+                                pricing: "25.50",
+                              ),
+                            ),
+                          )],
                       ),
                     ),
                   ],
@@ -89,34 +118,6 @@ class MyRides extends StatelessWidget {
   }
 }
 
-class RideHistoryTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SizedBox(height: 15),
-        Container(child: Image.asset("assets/images/img1.png")),
-      ],
-    );
-  }
-}
 
-class RideHistoryTab2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Container(child: Image.asset("assets/images/img2.png")),
-            Container(child: Image.asset("assets/images/img2.png")),
-            Container(child: Image.asset("assets/images/img2.png")),
-          ],
-        ),
-      ),
-    );
-  }
-}
+
+

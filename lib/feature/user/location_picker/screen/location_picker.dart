@@ -30,7 +30,7 @@ class LocationPicker extends StatelessWidget {
                 controller: controller.searchPickController,
                 cursorColor: Colors.amber,
                 decoration: InputDecoration(
-                  labelText: 'Enter pickup location',
+                  labelText: 'Enter pickup add location',
                   labelStyle: TextStyle(color: Colors.black),
                   fillColor: Colors.white,
                   filled: true,

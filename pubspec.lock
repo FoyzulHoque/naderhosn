@@ -635,7 +635,7 @@ packages:
   location:
     dependency: "direct main"
     description:
-      name: location
+      name: add location
       sha256: b080053c181c7d152c43dd576eec6436c40e25f326933051c330da563ddd5333
       url: "https://pub.dev"
     source: hosted

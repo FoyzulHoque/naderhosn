@@ -14,7 +14,7 @@ class CostCalculateController extends GetxController {
   var isPickLoading = false.obs;
   final TextEditingController searchPickController = TextEditingController();
 
-  // desination location address screen//
+  // desination add location address screen//
   var destPredictions = <Map<String, dynamic>>[].obs;
 
   var selectDestAddress = ''.obs;
@@ -70,8 +70,8 @@ class CostCalculateController extends GetxController {
       if (data['status'] == 'OK') {
         final result = data['result'];
         selectPickAddress.value = result['formatted_address'];
-        pickLat.value = result['geometry']['location']['lat'];
-        pickLong.value = result['geometry']['location']['lng'];
+        pickLat.value = result['geometry']['add location']['lat'];
+        pickLong.value = result['geometry']['add location']['lng'];
 
         // Set the text of the search box to the selected address
         searchPickController.text = selectPickAddress.value;
@@ -95,7 +95,7 @@ class CostCalculateController extends GetxController {
 
       final position = await getCurrentPickLocation();
       if (position == null) {
-        Get.snackbar('Error', 'Could not get current location');
+        Get.snackbar('Error', 'Could not get current add location');
         return;
       }
 
@@ -191,8 +191,8 @@ class CostCalculateController extends GetxController {
       if (data['status'] == 'OK') {
         final result = data['result'];
         selectDestAddress.value = result['formatted_address'];
-        destLat.value = result['geometry']['location']['lat'];
-        destLong.value = result['geometry']['location']['lng'];
+        destLat.value = result['geometry']['add location']['lat'];
+        destLong.value = result['geometry']['add location']['lng'];
 
         // Set the text of the search box to the selected address
         searchDestController.text = selectDestAddress.value;
@@ -216,7 +216,7 @@ class CostCalculateController extends GetxController {
 
       final position = await getCurrentDestLocation();
       if (position == null) {
-        Get.snackbar('Error', 'Could not get current location');
+        Get.snackbar('Error', 'Could not get current add location');
         return;
       }
 

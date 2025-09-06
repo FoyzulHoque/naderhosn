@@ -118,7 +118,7 @@ class RideCompletedScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Enter pickup location',
+                                'Enter pickup add location',
                                 style: globalTextStyle(
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF777F8B),
@@ -145,7 +145,7 @@ class RideCompletedScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Enter destination location',
+                                'Enter destination add location',
                                 style: globalTextStyle(
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF777F8B),

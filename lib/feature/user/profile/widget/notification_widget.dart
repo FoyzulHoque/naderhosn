@@ -53,7 +53,7 @@ class NotificationWidget extends StatelessWidget {
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  height: 24,
+                  height: 20,
                   width: 44,
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: BoxDecoration(
@@ -64,8 +64,8 @@ class NotificationWidget extends StatelessWidget {
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
                   child: Container(
-                    width: 20,
-                    height: 20,
+                    width: 16,
+                    height: 16,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(100),

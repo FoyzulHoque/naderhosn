@@ -45,7 +45,7 @@ class ExpandedBottomSheet1 extends StatelessWidget {
                 Align(
                   alignment: Alignment.center,
                   child: Text(
-                    "Confirm the pick-up location",
+                    "Confirm the pick-up add location",
                     style: globalTextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
