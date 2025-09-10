@@ -56,7 +56,7 @@ dependencies:
   google_places_flutter: ^2.1.0
   flutter_google_maps_webservices: ^1.1.1
   permission_handler: ^12.0.0+1
-  location: ^8.0.0
+  location: ^8.0.1
   pdf: ^3.11.3
   printing: ^5.14.2
   path_provider: ^2.1.5
