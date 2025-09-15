@@ -11,8 +11,8 @@ class SharedPreferencesHelper {
 
   // Save categories (id and name only)
   static Future<void> saveCategories(
-    List<Map<String, String>> categories,
-  ) async {
+      List<Map<String, String>> categories,
+      ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final categoriesJson = jsonEncode(categories);
     await prefs.setString(_categoriesKey, categoriesJson);

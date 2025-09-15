@@ -1,7 +1,13 @@
 class NetworkPath{
-  static const String _local_url="https://brother-taxi.onrender.com/api/v1";
-  static const String login="${_local_url}/users/create-user/register";
-  static const String authVerifyLogin="${_local_url}/auth/verify-login";
+  static const String _baseUrl="https://brother-taxi.onrender.com/api/v1";
+  static const String login="${_baseUrl}/users/create-user/register";
+  static const String authVerifyLogin="${_baseUrl}/auth/verify-login";
+
+  static const String getMe = '$_baseUrl/users/get-me';
+  static const String  myRides = '$_baseUrl/carTransports/my-rides';
+  static const String myRidesHistory = "$_baseUrl/carTransports/my-rides-history";
+  static const String updateProfile = "$_baseUrl/users/update-profile";
+  static const String currentFare = "$_baseUrl/fares/current"; // GET current fare
 }
 class APIKeys {
 
