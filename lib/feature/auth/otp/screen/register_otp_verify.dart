@@ -1,3 +1,4 @@
+// otp_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/feature/auth/user%20text%20editing%20controller/user_text_editing_controller.dart';
@@ -6,6 +7,7 @@ import '../../../../core/global_widegts/custom_button.dart';
 import '../../../../core/style/global_text_style.dart';
 import '../../add location/screen/screen.dart';
 import '../../login/widget/backgroundimage.dart';
+import '../controller/register_otp_controller.dart';
 
 class OtpScreen extends StatelessWidget {
   OtpScreen({super.key});
@@ -13,10 +15,13 @@ class OtpScreen extends StatelessWidget {
   final UserTextEditingController adminTextEditingController =
   Get.put(UserTextEditingController());
 
-  // 👇 Add missing fields
+  final RegisterOtpControllers registerOtpControllers =
+  Get.put(RegisterOtpControllers());
+
   final formKey = GlobalKey<FormState>();
   final focusNode = FocusNode();
 
+  // Default theme
   final defaultPinTheme = PinTheme(
     width: 56,
     height: 56,
@@ -32,6 +37,8 @@ class OtpScreen extends StatelessWidget {
   );
 
   final focusedBorderColor = Colors.blue;
+  final successBorderColor = Colors.green;
+  final errorBorderColor = Colors.redAccent;
   final fillColor = const Color.fromRGBO(243, 246, 249, 0);
 
   @override
@@ -82,46 +89,55 @@ class OtpScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            "Hay, We had send you code number by",
-                            style: globalTextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              lineHeight: 1.5,
-                              color: const Color(0xFF454F60),
-                            )),
+                          "Hay, We had send you code number by",
+                          style: globalTextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            lineHeight: 1.5,
+                            color: const Color(0xFF454F60),
+                          ),
+                        ),
                         const SizedBox(height: 20),
                         Text(
-                            "+54544645454",
-                            style: globalTextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              lineHeight: 1.5,
-                              color: const Color(0xFF454F60),
-                            )),
+                          "+54544645454",
+                          style: globalTextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            lineHeight: 1.5,
+                            color: const Color(0xFF454F60),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
+
+                    /// OTP Input
                     Directionality(
                       textDirection: TextDirection.ltr,
                       child: Pinput(
                         controller: adminTextEditingController.otp,
                         focusNode: focusNode,
+                        length: 4,
                         defaultPinTheme: defaultPinTheme,
                         separatorBuilder: (index) =>
                         const SizedBox(width: 8),
+
+                        /// Validation: Empty -> Error
                         validator: (value) {
-                          return value == '2222'
-                              ? null
-                              : 'Pin is incorrect';
+                          if (value == null || value.isEmpty) {
+                            return 'Pin is incorrect';
+                          }
+                          return null;
                         },
-                        hapticFeedbackType:
-                        HapticFeedbackType.lightImpact,
+
+                        hapticFeedbackType: HapticFeedbackType.lightImpact,
                         onCompleted: (pin) {
                           debugPrint('onCompleted: $pin');
                         },
                         onChanged: (value) {
                           debugPrint('onChanged: $value');
                         },
+
                         cursor: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -133,48 +149,44 @@ class OtpScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+
+                        /// Focused Style
                         focusedPinTheme: defaultPinTheme.copyWith(
                           decoration: defaultPinTheme.decoration!.copyWith(
                             borderRadius: BorderRadius.circular(8),
-                            border:
-                            Border.all(color: focusedBorderColor),
+                            border: Border.all(color: focusedBorderColor),
                           ),
                         ),
+
+                        /// Filled (Valid) -> Green
                         submittedPinTheme: defaultPinTheme.copyWith(
                           decoration: defaultPinTheme.decoration!.copyWith(
                             color: fillColor,
                             borderRadius: BorderRadius.circular(19),
-                            border:
-                            Border.all(color: focusedBorderColor),
+                            border: Border.all(color: successBorderColor),
                           ),
                         ),
+
+                        /// Error (Empty) -> Red
                         errorPinTheme: defaultPinTheme.copyWith(
                           decoration: defaultPinTheme.decoration!.copyWith(
-                            border:
-                            Border.all(color: Colors.redAccent),
+                            border: Border.all(color: errorBorderColor),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
+
                     CustomButton(
-                        title: "Resend OTP",
-                        onPress: (){
-                          /* focusNode.unfocus();
-                          if (formKey.currentState!.validate()) {
-                            Get.snackbar(
-                              "Success",
-                              "OTP is correct!",
-                              snackPosition: SnackPosition.BOTTOM,
-                            );
-                          }*/
-                        }
+                      title: "Resend OTP",
+                      onPress: () {},
                     ),
                     const SizedBox(height: 30),
+
                     CustomButton(
                       title: "Continue",
                       onPress: _otpApiHitButton,
-                      backgroundColor: Color(0xFFFFDC71),
+                      backgroundColor: const Color(0xFFFFDC71),
                     ),
                   ],
                 ),
@@ -186,10 +198,19 @@ class OtpScreen extends StatelessWidget {
     );
   }
 
-  void _otpApiHitButton() {
+  Future<void> _otpApiHitButton() async {
     focusNode.unfocus();
-    if(adminTextEditingController.otp.text=="1234"){
+
+    if (!formKey.currentState!.validate()) {
+      return; // show red error when empty
+    }
+
+    bool isSuccess = await registerOtpControllers.otpApiRiderMethod();
+    print("------is successes-------$isSuccess");
+    if (isSuccess) {
       Get.to(AddLocationScreen());
+    } else {
+      Get.snackbar("Login", "Failed", colorText: Colors.red);
     }
   }
 }

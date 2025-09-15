@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:naderhosn/feature/raider/my_rides/widget/ride_history_tap.dart';
-// Make sure to add this import for Google Maps
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 
 class RideHistoryTab2 extends StatelessWidget {
   final String buttonText;
