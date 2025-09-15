@@ -83,7 +83,7 @@ class MyRides extends StatelessWidget {
                             itemCount: 5,
                             itemBuilder: (context, index) {
                               return RideHistoryTab(
-                                imagePersion: "assets/icons/raider (2).png",
+                                imagePersion: "assets/icons/usericon.png",
                                 textPersion: "Justin Westervelt",
                                 imagelocation1: "assets/icons/Frame.png",
                                 textlocation1: "El-Baght Food Resmourants",
@@ -120,7 +120,7 @@ class MyRides extends StatelessWidget {
                                 widget: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: RideHistoryTab(
-                                    imagePersion: "assets/icons/raider (2).png",
+                                    imagePersion: "assets/icons/usericon.png",
                                     textPersion: "Justin Westervelt",
                                     imagelocation1: "assets/icons/Frame.png",
                                     textlocation1: "El-Baght Food Restaurants",

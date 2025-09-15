@@ -13,6 +13,7 @@ class UserTextEditingController extends GetxController {
   /// Getter to return country code + phone together
   String get countryCodeAndPhone => "${countryCode.text}${phone.text}".trim();
 
+
   /// Get the current country code display text
   String get currentCountryCodeDisplay {
     if (selectedCountryCode != null) {
