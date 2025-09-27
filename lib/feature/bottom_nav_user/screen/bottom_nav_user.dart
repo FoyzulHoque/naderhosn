@@ -12,40 +12,22 @@ class BottomNavbarUser extends StatelessWidget {
 
   final BottomNavUserController controller = Get.put(BottomNavUserController());
 
-  final List<Widget> pages = [
-    HomeScreen(),
-    CostCalculate(),
-    ChatScreen(),
-    ProfileScreen(),
-  ];
-
-  Future<bool> _onWillPop(BuildContext context) async {
-    return (await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Exit App'),
-            content: Text('Do you really want to exit the app?'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: Text('No'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: Text('Yes'),
-              ),
-            ],
-          ),
-        )) ??
-        false;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments as Map?;
+    final lat = args?["lat"];
+    final lng = args?["lng"];
+    final startIndex = args?["index"] ?? 0;
+
+    controller.changeIndex(startIndex);
+
+    final List<Widget> pages = [
+      HomeScreen(lat: lat, lng: lng),
+      CostCalculate(),
+      ChatScreen(),
+      ProfileScreen(),
+    ];
+
     return WillPopScope(
       onWillPop: () async {
         return await _onWillPop(context);
@@ -53,7 +35,6 @@ class BottomNavbarUser extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Obx(() => pages[controller.currentIndex.value]),
-
         bottomNavigationBar: BottomAppBar(
           elevation: 10,
           color: Colors.white,
@@ -90,6 +71,27 @@ class BottomNavbarUser extends StatelessWidget {
     );
   }
 
+  Future<bool> _onWillPop(BuildContext context) async {
+    return (await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Exit App'),
+        content: const Text('Do you really want to exit the app?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    )) ??
+        false;
+  }
+
   Widget _buildNavItem({
     required int index,
     required String activeImage,
@@ -108,62 +110,3 @@ class BottomNavbarUser extends StatelessWidget {
     );
   }
 }
-
-
-
-// children: [
-//                 _buildTile(
-//                   Icons.person_outline,
-//                   "Personal Information",
-//                   onTap: () => Get.to(() => PersonalInformation()),
-//                 ),
-//                 _buildTile(
-//                   Icons.directions_car,
-//                   "Vehicle Information",
-//                   onTap: () => Get.to(() => VehicleInformation()),
-//                 ),
-//                 _buildTile(
-//                   Icons.attach_money,
-//                   "Set Your Price",
-//                   onTap: () => Get.to(() => Pricing()),
-//                 ),
-//                 _buildTile(
-//                   Icons.lock_outline,
-//                   "Password",
-//                   onTap: () => Get.to(() => ChangePassword()),
-//                 ),
-//                 _buildSwitchTile(Icons.notifications_none, "Notification"),
-
-//                 _buildTile(
-//                   Icons.description_outlined,
-//                   "Terms & Privacy",
-//                   onTap: () => Get.to(() => TermsPrivacy()),
-//                 ),
-//                 _buildTile(
-//                   Icons.help_outline,
-//                   "Help & Support",
-//                   onTap: () => Get.to(() => HelpAndSupport()),
-//                 ),
-//                 _buildTile(
-//                   Icons.feedback_outlined,
-//                   "Share Feedback",
-//                   onTap: () => Get.to(() => ShareFeedback()),
-//                 ),
-//                 _buildTile(
-//                   Icons.delete_outline,
-//                   "Delete Account",
-//                   onTap: () => Get.dialog(CancelDeliveryDialog()),
-//                 ),
-//                 _buildTile(
-//                   Icons.logout,
-//                   "Sign Out",
-//                   onTap: () async {
-//                     try {
-//                       await SharedPreferencesHelper.clearAllData();
-//                       Get.to(() => SignInPage());
-//                     } catch (e) {
-//                       print(e);
-//                     }
-//                   },
-//                 ),
-//               ],
