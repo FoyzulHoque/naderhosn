@@ -5,11 +5,11 @@ class CustomButton extends StatelessWidget {
     super.key,
     required this.title,
     this.backgroundColor = Colors.transparent, // Default color
-    this.borderColor = Colors.black,
+    this.borderColor,
     required this.onPress,
     this.textStyle = const TextStyle(
       color: Color(0xff2D2D2D),
-      fontSize: 14,
+      fontSize: 16,
       fontWeight: FontWeight.w700,
     ), // Default text style
   });
@@ -36,7 +36,7 @@ class CustomButton extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border:
-                  borderColor != null ? Border.all(color: borderColor!) : null,
+              borderColor != null ? Border.all(color: borderColor!) : null,
             ),
             child: Center(child: Text(title, style: textStyle)),
           ),

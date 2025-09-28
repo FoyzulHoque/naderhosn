@@ -1,82 +1,48 @@
-import 'dart:convert';
-
-//import 'package:firebase_messaging/firebase_messaging.dart';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-
 import 'package:get/get.dart';
+import 'package:naderhosn/core/network_caller/network_config.dart';
+import 'package:naderhosn/feature/auth/login/model/rider_model.dart';
+import '../../../../core/network_path/natwork_path.dart';
+import '../../user text editing controller/user_text_editing_controller.dart';
 
-import 'package:http/http.dart' as http;
-import 'package:naderhosn/core/network_caller/endpoints.dart';
-import 'package:naderhosn/core/shared_preference/shared_preferences_helper.dart';
-
-class LoginController extends GetxController {
+class LoginApiRiderController extends GetxController {
   var isChecked = false.obs;
   var isPasswordHidden = true.obs;
-  var emailController = TextEditingController();
-  var passwordController = TextEditingController();
 
-  Future<void> loginUser() async {
-    final url = Uri.parse('${Urls.baseUrl}/auth/login');
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
 
+  UserTextEditingController userTextEditingController =
+  Get.put(UserTextEditingController());
+
+  //final DataHelperController dataHelperController =Get.put(DataHelperController());
+
+  Future<bool> loginApiRiderMethod() async {
+    bool isSuccess = false;
     try {
-      //'String? fcmToken = await FirebaseMessaging.instance.getToken();
-      //String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      //String? token = fcmToken ?? apnsToken;
-      //String? token = fcmToken;
-      // if (token != null) {
-      //   debugPrint("Token: $token");
-      // } else {
-      //   debugPrint("Token is null");
-      // }
-      EasyLoading.show(status: 'Logging in...');
+      Map<String, dynamic> mapBody = {
+        "phoneNumber": userTextEditingController.countryCodeAndPhone.trim(),
+        "role": "RIDER",
+      };
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "emailOrPhone": emailController.text.trim(),
-          "password": passwordController.text.trim(),
-          // if (fcmToken != null) "fcmToken": fcmToken,
-        }),
+      NetworkResponse response = await NetworkCall.postRequest(
+        url: NetworkPath.login, // <-- ensure this is the correct endpoint
+        body: mapBody,
       );
 
-      if (kDebugMode) {
-        print("Response: ${response.body}");
-      }
+      if (response.isSuccess) {
+        print("---------------------$mapBody");
+        var riderModel = RiderModel.fromJson(response.responseData!["data"]);
+        print("---------------------$riderModel");
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
-        if (responseData["success"] == true) {
-          if (responseData["data"] != null) {
-            String token = responseData["data"]["token"] ?? "";
-
-            if (token.isNotEmpty) {
-              await SharedPreferencesHelper.saveToken(token);
-              EasyLoading.showSuccess("Logged in successfully");
-              //   Get.offAll(BottomNavbar());
-            } else {
-              EasyLoading.showError("Token is missing in response.");
-            }
-          } else {
-            EasyLoading.showError("Invalid response: 'data' is null.");
-          }
-        } else {
-          EasyLoading.showError(responseData["message"] ?? "Login failed.");
-        }
+        _errorMessage = null;
+        isSuccess = true;
+        update();
       } else {
-        EasyLoading.showError("An error occurred: ${response.statusCode}");
+        _errorMessage = response.errorMessage;
       }
     } catch (e) {
-      EasyLoading.showError("An error occurred: $e");
-      if (kDebugMode) {
-        print("Error: $e");
-      }
-    } finally {
-      EasyLoading.dismiss();
+      print(e);
     }
+    return isSuccess;
   }
 }
