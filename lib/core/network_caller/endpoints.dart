@@ -6,7 +6,6 @@ class Urls {
   static const String logout = '$baseUrl/auth/logout';
   static const String forgotPass = '$baseUrl/auth/forgot-password';
   static const String pickUpLocation = '$baseUrl/user/pickup-locations';
-  static String getCalendar(String date, String locationUuid) =>
-      '$baseUrl/calendar?date=$date&pickup_location_uuid=$locationUuid';
+  static String getCalendar(String date, String locationUuid) =>'$baseUrl/calendar?date=$date&pickup_location_uuid=$locationUuid';
 
 }
