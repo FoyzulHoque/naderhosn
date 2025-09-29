@@ -41,32 +41,6 @@ class RegisterOtpControllers extends GetxController {
       debugPrint("📥 API Response Status Code: ${response.statusCode}");
       debugPrint("📥 API Response Data: ${response.responseData}");
 
- /*     if (response.isSuccess) {
-        final data = response.responseData;
-        if (data != null) {
-          final String? token = data['accessToken'] ?? data['token'];
-          final Map<String, dynamic>? userData = data['data'];
-
-          if (token != null && userData != null) {
-            riderModel = RiderModel.fromJson(userData);
-            await AuthController.setUserData(token, riderModel!);
-            isSuccess = true;
-            _errorMessage = null;
-          } else {
-            _errorMessage = "Token or user data missing in response";
-          }
-        } else {
-          _errorMessage = "Failed to parse API response.";
-        }
-      } else {
-        // Correctly handling the error response
-        final responseData = response.responseData;
-        if (responseData != null && responseData is Map<String, dynamic>) {
-          _errorMessage = responseData['message'] ?? "Something went wrong";
-        } else {
-          _errorMessage = "Something went wrong";
-        }
-      }*/
       if (response.isSuccess) {
 
         String token=response.responseData!['data']["token"];

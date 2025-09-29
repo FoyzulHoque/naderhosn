@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class LocationPickerController extends GetxController {
-  final String apiKey = 'AIzaSyATkpZxtsIVek6xHnGRsse_i4yVEofqQbI';
+  final String apiKey = 'AIzaSyC7AoMhe2ZP3iHflCVr6a3VeL0ju0bzYVE';
 
   var pickPredictions = <Map<String, dynamic>>[].obs;
   var selectPickAddress = ''.obs;
@@ -42,8 +42,7 @@ class LocationPickerController extends GetxController {
       return;
     }
 
-    final url =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=geocode';
+    final url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=geocode';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -61,8 +60,7 @@ class LocationPickerController extends GetxController {
   }
 
   Future<void> selectPickPlace(String placeId, String description) async {
-    final url =
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
+    final url = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -102,8 +100,7 @@ class LocationPickerController extends GetxController {
       final lat = position.latitude;
       final lng = position.longitude;
 
-      final url =
-          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey';
+      final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey';
 
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -163,8 +160,7 @@ class LocationPickerController extends GetxController {
       return;
     }
 
-    final url =
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=geocode';
+    final url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=geocode';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -182,8 +178,7 @@ class LocationPickerController extends GetxController {
   }
 
   Future<void> selectDestPlace(String placeId, String description) async {
-    final url =
-        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
+    final url = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$apiKey';
 
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -223,8 +218,7 @@ class LocationPickerController extends GetxController {
       final lat = position.latitude;
       final lng = position.longitude;
 
-      final url =
-          'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey';
+      final url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey';
 
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

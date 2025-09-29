@@ -8,6 +8,8 @@ import 'package:naderhosn/feature/raider/profile/widget/notification_widget.dart
 import 'package:naderhosn/feature/raider/profile/widget/profile_action_widgets.dart';
 import 'package:naderhosn/feature/raider/profile/widget/profile_edit_screen.dart';
 
+import '../../../../core/services_class/data_helper.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -210,6 +212,7 @@ class ProfileScreen extends StatelessWidget {
                 actionName: "Log out",
                 style: globalTextStyle(),
                 voidCallback: () {
+                  AuthController.dataClear();
                   Get.to(() => LoginView());
                 },
                 iconData: (Icons.arrow_forward_ios),

@@ -3,11 +3,13 @@ import 'package:get/get.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 
+import '../../../bottom_nav_user/controller/bottom_nav_user_controller.dart';
 import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
 import '../widget/background_image_for_location.dart';
 
 class AddLocationScreen extends StatelessWidget {
-  const AddLocationScreen({super.key});
+   AddLocationScreen({super.key});
+  BottomNavUserController bottomNavUserController=Get.put(BottomNavUserController());
 
   @override
   Widget build(BuildContext context) {
@@ -66,15 +68,17 @@ class AddLocationScreen extends StatelessWidget {
                           children: [
                             CustomButton(
                               title: "Use Current Location",
-                              onPress: () {},
+                              onPress: () {
+                                  bottomNavUserController.changeIndex(0);
+                              },
                               borderColor: Color(0xFFEDEDF3),
                             ),
-                            SizedBox(height: 16),
+                            /*SizedBox(height: 16),
                             CustomButton(
                               title: "Enter a new address",
                               onPress: () {},
                               borderColor: Color(0xFFEDEDF3),
-                            ),
+                            ),*/
                           ],
                         ),
                       ),

@@ -9,4 +9,7 @@ class Urls {
   static String getCalendar(String date, String locationUuid) =>
       '$baseUrl/calendar?date=$date&pickup_location_uuid=$locationUuid';
 
+
+  static const String googleApiKey="AIzaSyC7AoMhe2ZP3iHflCVr6a3VeL0ju0bzYVE";
+
 }

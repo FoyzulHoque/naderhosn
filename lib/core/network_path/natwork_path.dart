@@ -9,6 +9,7 @@ class APIKeys {
   static const String stripePublishable_key= "pk_test_51S1B2KGuTKt9FvErKUcjnU9Cm1mR2RXR9biSbz0gEEk49VajT7cVFBMrNdqsfwvFCrdTMKshUXmCZnYwjG8PWkvc00pIq2BfQz";
   static const String stripeSecret_key= "sk_test_51S1B2KGuTKt9FvErd0wCR1bqr3EfClcTxtG9XkN2JbNfJszh2FB7w9rWZofvzt0KWnEG1dWpTon1qqdgMRvRPFBp00Zk0B0G6L";
 
+  static const String googleApiKey="AIzaSyC7AoMhe2ZP3iHflCVr6a3VeL0ju0bzYVE";
 
   static const String stripePublishable_keys =
       "pk_test_51Qbw9kDLg7WG0GxrgsoFCAguT4cJH0zvW602k7s49MoRWyuE4xgHUqoxd82PFhYGiooV89LO3IYqniXHNtYetLv100yyfGLc6j";
