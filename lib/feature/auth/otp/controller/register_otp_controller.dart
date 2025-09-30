@@ -6,6 +6,8 @@ import 'package:naderhosn/core/services_class/data_helper.dart';
 import 'package:naderhosn/feature/auth/login/model/rider_model.dart';
 import 'package:naderhosn/feature/auth/user%20text%20editing%20controller/user_text_editing_controller.dart';
 
+import '../../../../core/services_class/shared_preferences_helper.dart';
+
 class RegisterOtpControllers extends GetxController {
   final TextEditingController otpController = TextEditingController();
   var otpError = false.obs;
@@ -41,41 +43,28 @@ class RegisterOtpControllers extends GetxController {
       debugPrint("📥 API Response Status Code: ${response.statusCode}");
       debugPrint("📥 API Response Data: ${response.responseData}");
 
- /*     if (response.isSuccess) {
-        final data = response.responseData;
-        if (data != null) {
-          final String? token = data['accessToken'] ?? data['token'];
-          final Map<String, dynamic>? userData = data['data'];
-
-          if (token != null && userData != null) {
-            riderModel = RiderModel.fromJson(userData);
-            await AuthController.setUserData(token, riderModel!);
-            isSuccess = true;
-            _errorMessage = null;
-          } else {
-            _errorMessage = "Token or user data missing in response";
-          }
-        } else {
-          _errorMessage = "Failed to parse API response.";
-        }
-      } else {
-        // Correctly handling the error response
-        final responseData = response.responseData;
-        if (responseData != null && responseData is Map<String, dynamic>) {
-          _errorMessage = responseData['message'] ?? "Something went wrong";
-        } else {
-          _errorMessage = "Something went wrong";
-        }
-      }*/
       if (response.isSuccess) {
+        // Extract token
+        String token = response.responseData!['data']["token"];
 
-        String token=response.responseData!['data']["token"];
-        RiderModel riderModel=RiderModel.fromJson(response.responseData!["data"]);
-        await AuthController.setUserData(token,riderModel);
-        isSuccess=true;
-        _errorMessage=null;
+        // Parse RiderModel
+        RiderModel riderModel = RiderModel.fromJson(response.responseData!["data"]);
+
+        // Save token in SharedPreferences
+        await SharedPreferencesHelper.saveToken(token);
+        print("----------------------------------------✅ Token saved: $token");
+
+        // Optionally save rider data in AuthController (or anywhere you want)
+        await AuthController.setUserData(token, riderModel);
+
+        isSuccess = true;
+        _errorMessage = null;
         update();
+      } else {
+        _errorMessage = response.errorMessage;
+        print("❌ Login failed: $_errorMessage");
       }
+
     } catch (e) {
       _errorMessage = "Exception: $e";
       debugPrint("❌ OTP Verify Exception: $e");
