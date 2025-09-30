@@ -39,7 +39,7 @@ class UserProfileController extends GetxController {
 
       // Call API
       NetworkResponse response = await NetworkCall.getRequest(
-        url: NetworkPath.getMe, // /users/get-me
+        url: NetworkPath.getMe,
         headers: headers,
       );
 

@@ -33,9 +33,10 @@ class FaresController extends GetxController {
       };
 
       NetworkResponse response = await NetworkCall.getRequest(
-        url: NetworkPath.currentFare, // define in NetworkPath
-        headers: headers,
+        url: NetworkPath.getCurrentFare,
+        headers: headers,  // now it works
       );
+
 
       if (response.isSuccess) {
         currentFare.value = FareModel.fromJson(response.responseData!["data"]);

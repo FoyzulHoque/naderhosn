@@ -9,6 +9,7 @@ class RideHistoryController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = "".obs;
   var rideHistoryList = <RideHistoryModel>[].obs;
+  Map<String, String>? headers;
 
   @override
   void onInit() {
@@ -37,8 +38,9 @@ class RideHistoryController extends GetxController {
 
       NetworkResponse response = await NetworkCall.getRequest(
         url: NetworkPath.myRidesHistory,
-        headers: headers,
+        headers: headers,  // now it works
       );
+
 
       if (response.isSuccess) {
         final data = response.responseData?["data"];

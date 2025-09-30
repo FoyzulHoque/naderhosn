@@ -450,6 +450,7 @@ class NetworkCall {
   static Future<NetworkResponse> multipartRequest({
     required String url,
     Map<String, String>? fields,
+    Map<String, String>? headers,
     File? imageFile,
     File? videoFile,
     required String methodType,
@@ -573,6 +574,7 @@ class NetworkCall {
   static Future<NetworkResponse> patchRequest({
     required String url,
     Map<String, dynamic>? body,
+    Map<String, String>? headers,
   }) async {
     try {
       final Uri uri = Uri.parse(url);
@@ -623,6 +625,7 @@ class NetworkCall {
   static Future<NetworkResponse> getRequest({
     required String url,
     Map<String, dynamic>? queryParams,
+    Map<String, String>? headers,   // ✅ Added
   }) async {
     try {
       String fullUrl = url;
@@ -635,16 +638,18 @@ class NetworkCall {
       }
 
       final Uri uri = Uri.parse(fullUrl);
-      Map<String, String> headers = {
+
+      Map<String, String> requestHeaders = {
         "Content-Type": "application/json",
       };
-      if (AuthController.accessToken != null &&
-          AuthController.accessToken!.isNotEmpty) {
-        headers['Authorization'] = AuthController.accessToken!;
+
+      // Merge headers if provided
+      if (headers != null) {
+        requestHeaders.addAll(headers);
       }
 
-      _logRequest(fullUrl, headers);
-      Response response = await get(uri, headers: headers);
+      _logRequest(fullUrl, requestHeaders);
+      Response response = await get(uri, headers: requestHeaders);
       _logResponse(fullUrl, response);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -672,6 +677,7 @@ class NetworkCall {
       );
     }
   }
+
 
   /// PUT request
   static Future<NetworkResponse> putRequest({
