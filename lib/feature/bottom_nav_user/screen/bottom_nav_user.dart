@@ -7,15 +7,19 @@ import 'package:naderhosn/feature/raider/cost_calculate/screen/cost_calculate.da
 import 'package:naderhosn/feature/raider/home/screen/home.dart';
 import 'package:naderhosn/feature/raider/profile/screen/profile_screen.dart';
 
+import '../../friends/screen/chat_screen.dart';
+
 class BottomNavbarUser extends StatelessWidget {
   BottomNavbarUser({super.key});
 
   final BottomNavUserController controller = Get.put(BottomNavUserController());
 
-  final List<Widget> pages = [
+  final String carTransportId = "68dac36a9d6556e4d3aa05eb";
+
+  late final List<Widget> pages = [
     HomeScreen(),
     CostCalculate(),
-    ChatScreen(),
+    ChatScreen(carTransportId: carTransportId),
     ProfileScreen(),
   ];
 

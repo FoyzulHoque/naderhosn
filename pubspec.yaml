@@ -68,7 +68,8 @@ dependencies:
   url_launcher: ^6.3.1
   logger: ^2.6.1
   web_socket_channel: ^3.0.3
-  
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

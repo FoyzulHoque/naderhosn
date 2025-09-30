@@ -7,7 +7,7 @@ class AuthController {
   static String? accessToken;
   static RiderModel? userModel;
   static String? accessKey;
-
+  static const String _userIdKey = 'userId';
   static const String _accessTokenKey = 'access-token';
   static const String _userDataKey = 'user-data';
 
@@ -49,7 +49,15 @@ class AuthController {
   }
 
 
+  static Future<void> saveUserId(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userIdKey, id);
+  }
 
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userIdKey);
+  }
   // Data check
   static Future<bool> isUserLogin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

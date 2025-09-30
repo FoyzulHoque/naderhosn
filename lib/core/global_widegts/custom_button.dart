@@ -6,29 +6,38 @@ class CustomButton extends StatelessWidget {
     required this.title,
     this.backgroundColor = Colors.transparent, // Default color
     this.borderColor,
-    required this.onPress,
+    required this.onPress, // <<<<< MODIFIED: Now accepts VoidCallback?
     this.textStyle = const TextStyle(
-      color: Color(0xff2D2D2D),
+      color: Color(0xff2D2D2D), // Default text color if button is active
       fontSize: 16,
       fontWeight: FontWeight.w700,
-    ), // Default text style
+    ),
   });
 
   final String title;
   final Color backgroundColor;
   final Color? borderColor;
-  final TextStyle textStyle; // Default text style is set to white color
-  final VoidCallback onPress;
+  final TextStyle textStyle;
+  final VoidCallback? onPress; // <<<<< MODIFIED: Made this nullable
 
   @override
   Widget build(BuildContext context) {
+    bool isEnabled = onPress != null; // Check if the button is enabled
+
+    // Adjust colors and splash for disabled state
+    Color effectiveBackgroundColor = isEnabled ? backgroundColor : Colors.grey.shade300;
+    TextStyle effectiveTextStyle = isEnabled
+        ? textStyle
+        : textStyle.copyWith(color: Colors.grey.shade600); // Dim text when disabled
+    Color splashColor = isEnabled ? Colors.white.withAlpha(128) : Colors.transparent; // No splash when disabled
+
     return Material(
-      color: backgroundColor,
+      color: effectiveBackgroundColor, // Use effective color
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
-        splashColor: Colors.white.withValues(alpha: 0.5),
+        splashColor: splashColor, // Use effective splash color
         borderRadius: BorderRadius.circular(8),
-        onTap: onPress,
+        onTap: onPress, // This will correctly do nothing if onPress is null
         child: Center(
           child: Container(
             width: double.infinity,
@@ -36,9 +45,9 @@ class CustomButton extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               border:
-              borderColor != null ? Border.all(color: borderColor!) : null,
+              borderColor != null ? Border.all(color: isEnabled ? borderColor! : Colors.grey.shade400) : null, // Dim border when disabled
             ),
-            child: Center(child: Text(title, style: textStyle)),
+            child: Center(child: Text(title, style: effectiveTextStyle)), // Use effective text style
           ),
         ),
       ),
