@@ -6,4 +6,7 @@ class BottomNavUserController extends GetxController {
   void changeIndex(int index) {
     currentIndex.value = index;
   }
+  void homepage() {
+    currentIndex.value = 0;
+  }
 }

@@ -8,7 +8,11 @@ import 'package:naderhosn/feature/raider/profile/widget/notification_widget.dart
 import 'package:naderhosn/feature/raider/profile/widget/profile_action_widgets.dart';
 import 'package:naderhosn/feature/raider/profile/widget/profile_edit_screen.dart';
 
+
+import '../../../../core/services_class/data_helper.dart';
+
 import '../controller/user_profile_controller.dart';
+
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
@@ -190,6 +194,55 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
 
+
+              const SizedBox(height: 21),
+              NotificationWidget(
+                tagId: "Notification",
+                image: "assets/icons/notification.png",
+                actionName: "Notification",
+                style: globalTextStyle(),
+                voidCallback: () => print("Switch toggled"),
+              ),
+              const SizedBox(height: 21),
+              ProfileActionWidgets(
+                image: "assets/icons/car.png",
+                actionName: "My rides",
+                style: globalTextStyle(),
+                voidCallback: () {
+                  Get.to(() => MyRides());
+
+                  //  Get.snackbar("Hello", "");
+                },
+                iconData: (Icons.arrow_forward_ios),
+                size: 18,
+              ),
+              const SizedBox(height: 21),
+              ProfileActionWidgets(
+                image: "assets/icons/terms.png",
+                actionName: "Privacy policy",
+                style: globalTextStyle(),
+                voidCallback: () {
+                  Get.to(() => PrivacyPolicy());
+                },
+                iconData: (Icons.arrow_forward_ios),
+                size: 18,
+              ),
+              const SizedBox(height: 21),
+              ProfileActionWidgets(
+                image: "assets/icons/logout.png",
+                actionName: "Log out",
+                style: globalTextStyle(),
+                voidCallback: () {
+                  AuthController.dataClear();
+                  Get.to(() => LoginView());
+                },
+                iconData: (Icons.arrow_forward_ios),
+                size: 18,
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+
                 const SizedBox(height: 21),
                 NotificationWidget(
                   tagId: "Notification",
@@ -229,6 +282,7 @@ class ProfileScreen extends StatelessWidget {
               ],
             );
           }),
+
         ),
       ),
     );
