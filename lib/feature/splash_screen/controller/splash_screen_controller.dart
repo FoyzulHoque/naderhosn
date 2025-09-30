@@ -8,7 +8,12 @@ import '../../auth/login/view/login_view.dart';
 import '../../auth/onboarding/view/onboarding.dart';
 import '../../bottom_nav_user/screen/bottom_nav_user.dart';
 
+import '../../../core/services_class/shared_preferences_helper.dart';
+import '../../bottom_nav_user/screen/bottom_nav_user.dart';
+import '../screen/splash_screen.dart';
+
 class SplashScreenController extends GetxController {
+
   Future<void> checkIsLogin() async {
     // 1. Get the login status (bool) and the token (String?) upfront
     bool isLogin = await AuthController.isUserLogin();
@@ -29,6 +34,19 @@ class SplashScreenController extends GetxController {
       }else {
         // If 'isLogin' is false, or if token is null for some reason, navigate to Onboarding.
         Get.offAll(() => OnboardingScreen());
+
+  void checkIsLogin() async {
+    Timer(const Duration(seconds: 1), () async {
+      final showOnboard = await SharedPreferencesHelper.getShowOnboard();
+      final token = await SharedPreferencesHelper.getAccessToken();
+      if (!showOnboard) {
+        await SharedPreferencesHelper.setShowOnboard(true);
+        Get.offAll(() => SplashScreen());
+      } else if (token != null && token.isNotEmpty) {
+        Get.to(() => BottomNavbarUser());
+      } else {
+        Get.offAll(OnboardingScreen());
+
       }
     });
   }
