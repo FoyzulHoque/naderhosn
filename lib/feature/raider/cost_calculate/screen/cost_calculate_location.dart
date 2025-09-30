@@ -10,7 +10,6 @@ class CostCalculateLocation extends StatelessWidget {
   CostCalculateLocation({super.key});
   final CostCalculateController controller = Get.put(CostCalculateController());
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

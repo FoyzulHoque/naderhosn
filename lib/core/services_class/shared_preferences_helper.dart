@@ -2,100 +2,56 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesHelper {
   static const String _accessTokenKey = 'token';
-  static const String _roleKey = 'role';
-  static const String _userIdKey = 'userId';
-  static const String _isLoginKey = 'isLogin';
-  static const String _phoneNoKey = 'phoneNo';
-  static const String _localeKey = 'locale';
-  static const String _showOnboardKey = 'showOnboard';
+  static const String _userTypeKey = 'userType';
 
-  // Token
+  // Save access token
+
   static Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(_accessTokenKey, token);
-    await prefs.setBool(_isLoginKey, true);
+    await prefs.setBool('isLogin', true);
   }
 
+  // Retrieve access token
   static Future<String?> getAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(_accessTokenKey);
   }
 
-  // Role
-  static Future<void> saveUserRole(String role) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_roleKey, role);
-  }
-
-  static Future<String?> getUserRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_roleKey);
-  }
-
-  // User ID
-  static Future<void> saveUserId(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userIdKey, id);
-  }
-
-  static Future<String?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userIdKey);
-  }
-
-  // Login check
-  static Future<bool> checkLogin() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_isLoginKey) ?? false;
-  }
-
-  // Clear
+  // Clear access token
   static Future<void> clearAllData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_accessTokenKey);
-    await prefs.remove(_roleKey);
-    await prefs.remove(_userIdKey);
-    await prefs.remove(_isLoginKey);
-    await prefs.remove(_phoneNoKey);
-    await prefs.remove(_localeKey);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accessTokenKey); // Clear the token
+    await prefs.remove(_userTypeKey); // Clear the role
+    await prefs.remove('isLogin'); // Clear the login status
   }
 
+  static Future<String?> getPickerLocationUuid() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('pickerLocationUuid');
+  }
+
+  // Clear access token
   static Future<void> clearAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove(_accessTokenKey);
-    await prefs.remove(_isLoginKey);
+    await prefs.remove('isLogin');
   }
 
-  // Phone Number
-  static Future<void> savePhoneNo(String phoneNo) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_phoneNoKey, phoneNo);
-  }
-
-  static Future<String?> getPhoneNo() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_phoneNoKey);
-  }
-
-  // Locale
-  static Future<void> saveLocale(String locale) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_localeKey, locale);
-  }
-
-  static Future<String?> getLocale() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_localeKey);
-  }
-  static Future<void> setShowOnboard(bool value) async {
+  static Future<bool?> checkLogin() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_showOnboardKey, value);
+    return prefs.getBool("isLogin") ?? false;
   }
 
-  // Retrieve the showOnboard flag
-  static Future<bool> getShowOnboard() async {
+  // Save user type
+  static Future<void> saveUserType(String userType) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_showOnboardKey) ??
-        false; // Default to false if not set
+    await prefs.setString(_userTypeKey, userType);
+  }
+
+  // Retrieve user type
+  static Future<String?> getUserType() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userTypeKey);
   }
 }

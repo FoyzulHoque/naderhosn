@@ -572,7 +572,7 @@ class NetworkCall {
   /// PATCH request
   static Future<NetworkResponse> patchRequest({
     required String url,
-    Map<String, dynamic>? body, required Map<String, String> headers,
+    Map<String, dynamic>? body,
   }) async {
     try {
       final Uri uri = Uri.parse(url);
@@ -622,7 +622,7 @@ class NetworkCall {
   /// GET request
   static Future<NetworkResponse> getRequest({
     required String url,
-    Map<String, dynamic>? queryParams, required Map<String, String> headers,
+    Map<String, dynamic>? queryParams,
   }) async {
     try {
       String fullUrl = url;

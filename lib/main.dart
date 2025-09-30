@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/feature/splash_screen/screen/splash_screen.dart';
 
-import 'feature/raider/cost_calculate/screen/cost_calculate.dart';
-import 'feature/raider/cost_calculate/screen/cost_calculate_location.dart';
-
 void main() {
   runApp(const MyApp());
 }

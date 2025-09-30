@@ -6,8 +6,6 @@ import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/cost_calculate/controller/cost_calculate_controller.dart';
 import 'package:naderhosn/feature/raider/cost_calculate/screen/cost_calculate_location.dart';
 
-import '../controller/fares_controller.dart';
-
 class CostCalculate extends StatelessWidget {
   CostCalculate({super.key});
   final CostCalculateController controller = Get.put(CostCalculateController());
@@ -122,172 +120,169 @@ class CostCalculate extends StatelessWidget {
 }
 
 class CostCalculateSheet extends StatelessWidget {
-  CostCalculateSheet({super.key});
-
-  final FaresController fareController = Get.put(FaresController());
+  const CostCalculateSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // API call to get current fare
-    fareController.getCurrentFare();
-
     return DraggableScrollableSheet(
       initialChildSize: 0.4,
       minChildSize: 0.1,
       maxChildSize: 0.6,
       builder: (BuildContext context, ScrollController scrollController) {
-        return Obx(() {
-          if (fareController.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            boxShadow: [
+              BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 50,
+                    height: 5,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[400],
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Price Breakdown",
+                    style: globalTextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
 
-          if (fareController.errorMessage.isNotEmpty) {
-            return Center(child: Text(fareController.errorMessage.value));
-          }
+                Divider(),
+                Text(
+                  "Your fare will be the price presented before the trip or based on the rates below and other applicable surcharges and adjustments",
+                  style: globalTextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
 
-          if (fareController.currentFare.value == null) {
-            return const Center(child: Text("No fare data found"));
-          }
+                Align(
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    "assets/images/car2.png",
+                    width: MediaQuery.of(context).size.width * 0.5,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Base Fare",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "\$33.00",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Minimum Fare",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "\$38.00",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "+ Per Minute",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "\$00.00",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "+ Per Kilometer",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "\$11.00",
+                      style: globalTextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Divider(),
+                SizedBox(height: 10),
+                Text(
+                  "Additional wait time charges may apply to your trip if the driver has waited 4 minute(s): BDT 1.20 per minute.",
+                  style: globalTextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 20),
 
-          final fare = fareController.currentFare.value!;
-
-          return Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              boxShadow: [
-                BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1),
+                CustomButton(
+                  title: "Close",
+                  borderColor: Colors.transparent,
+                  backgroundColor: Color(0xFFFFDC71),
+                  onPress: () {
+                    Navigator.pop(context);
+                  },
+                ),
               ],
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      width: 50,
-                      height: 5,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[400],
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Price Breakdown",
-                      style: globalTextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const Divider(),
-                  Text(
-                    "Your fare will be the price presented before the trip or based on the rates below and other applicable surcharges and adjustments",
-                    style: globalTextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Image.asset(
-                      "assets/images/car2.png",
-                      width: MediaQuery.of(context).size.width * 0.5,
-                    ),
-                  ),
-
-                  // Base Fare
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Base Fare",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.baseFare}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  // Minimum Fare
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Minimum Fare",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.minimumFare}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  // Cost per Minute
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "+ Per Minute",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.costPerMin}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  // Cost per Kilometer
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "+ Per Kilometer",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.costPerKm}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-                  const Divider(),
-                  const SizedBox(height: 10),
-
-                  // Waiting per Minute
-                  Text(
-                    "Additional wait time charges may apply: ৳${fare.waitingPerMin} per minute.",
-                    style: globalTextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 20),
-
-                  CustomButton(
-                    title: "Close",
-                    borderColor: Colors.transparent,
-                    backgroundColor: const Color(0xFFFFDC71),
-                    onPress: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
+          ),
+        );
       },
     );
   }

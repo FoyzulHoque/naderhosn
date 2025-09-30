@@ -627,7 +627,7 @@ class LocationPicker extends StatelessWidget {
                   ),
                   // --- Use Current Location Button for Drop-Off (optional, added for completeness) ---
                   const SizedBox(height: 16),
-                  controller.isDropOffLoading.value
+                  /*controller.isDropOffLoading.value
                       ? const Center(child: CircularProgressIndicator(color: Colors.green, strokeWidth: 2))
                       : ElevatedButton.icon(
                     onPressed: () async {
@@ -641,7 +641,7 @@ class LocationPicker extends StatelessWidget {
                       elevation: 0,
                       side: const BorderSide(color: Colors.black12, width: 1),
                     ),
-                  ),
+                  ),*/
                 ],
               )
               // --- Selected Drop-Off Address Display/Clear ---

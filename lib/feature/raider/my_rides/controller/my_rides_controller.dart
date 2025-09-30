@@ -1,81 +1,12 @@
 import 'package:get/get.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import '../../../../core/network_caller/network_config.dart';
-import '../../../../core/network_path/natwork_path.dart';
-import '../../../../core/services_class/shared_preferences_helper.dart';
-import '../model/my_ride_model.dart';
 
 class MyRidesController extends GetxController {
-  var isLoading = false.obs;
-  var errorMessage = "".obs;
-  var myRides = <MyRideModel>[].obs;
-  var currentTabIndex = 0.obs; // Added missing variable
+  var currentTabIndex = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    // You can listen to tab changes if needed
-    ever(currentTabIndex, (index) {
-      print("Current tab changed to: $index");
-    });
 
-    // Fetch rides initially
-    fetchMyRides();
-  }
-
-  /// Fetch My Rides
-  Future<void> fetchMyRides() async {
-    isLoading.value = true;
-    errorMessage.value = "";
-    EasyLoading.show(status: "Fetching rides...");
-
-    try {
-      // Token
-      final token = await SharedPreferencesHelper.getAccessToken();
-      if (token == null || token.isEmpty) {
-        errorMessage.value = "Access token not found. Please login.";
-        EasyLoading.showError(errorMessage.value);
-        return;
-      }
-
-      // Headers
-      Map<String, String> headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-
-      // Call API
-      NetworkResponse response = await NetworkCall.getRequest(
-        url: NetworkPath.myRides, // /carTransports/my-rides
-        headers: headers,
-      );
-
-      if (response.isSuccess) {
-        final data = response.responseData?["data"];
-        if (data != null && data is List) {
-          myRides.value = data
-              .map((e) => MyRideModel.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
-        } else {
-          myRides.clear();
-        }
-        EasyLoading.showSuccess("Rides fetched successfully");
-      } else {
-        errorMessage.value =
-            response.errorMessage ?? "Failed to load rides";
-        EasyLoading.showError(errorMessage.value);
-      }
-    } catch (e) {
-      errorMessage.value = "Error: $e";
-      EasyLoading.showError(errorMessage.value);
-    } finally {
-      isLoading.value = false;
-      EasyLoading.dismiss();
-    }
-  }
-
-  /// Change tab index
-  void changeTab(int index) {
-    currentTabIndex.value = index;
+    ever(currentTabIndex, (index) {});
   }
 }

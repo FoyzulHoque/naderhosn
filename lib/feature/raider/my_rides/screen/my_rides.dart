@@ -5,21 +5,20 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/my_rides/controller/my_rides_controller.dart';
-import '../controller/ride_history_controller.dart';
+
 import '../widget/ride_history_tab2.dart';
 import '../widget/ride_history_tap.dart';
 
 class MyRides extends StatelessWidget {
   MyRides({super.key});
 
-  final MyRidesController myRidesController = Get.put(MyRidesController());
-  final RideHistoryController rideHistoryController = Get.put(RideHistoryController());
+  final MyRidesController controller = Get.put(MyRidesController());
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      initialIndex: myRidesController.currentTabIndex.value,
+      initialIndex: controller.currentTabIndex.value,
       child: Builder(
         builder: (context) {
           final tabController = DefaultTabController.of(context);
@@ -39,7 +38,7 @@ class MyRides extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "My rides",
+                        "My rides ",
                         style: globalTextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
@@ -77,74 +76,64 @@ class MyRides extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 10),
                     Expanded(
-                      child: Obx(() {
-                        if (myRidesController.isLoading.value) {
-                          return const Center(child: CircularProgressIndicator());
-                        }
-
-                        if (myRidesController.myRides.isEmpty) {
-                          return const Center(child: Text("No rides found"));
-                        }
-
-                        return TabBarView(
-                          children: [
-                            // My Rides Tab
-                            ListView.builder(
-                              itemCount: myRidesController.myRides.length,
-                              itemBuilder: (context, index) {
-                                final ride = myRidesController.myRides[index];
-                                return RideHistoryTab(
-                                  imagePersion:"assets/icons/usericon.png",
-                                  textPersion: ride.user?.fullName ?? "Unknown",
-                                  imagelocation1: "assets/icons/Frame.png",
-                                  textlocation1: ride.pickupLocation,
-                                  imagelocation2: "assets/icons/location-08 (4).png",
-                                  textlocation2: ride.dropOffLocation,
-                                  pricing: ride.totalAmount.toString(),
-                                );
-                              },
-                            ),
-
-                            // Ride History Tab
-                            ListView.builder(
-                              itemCount: rideHistoryController.rideHistoryList.length,
-                              itemBuilder: (context, index) {
-                                final ride = rideHistoryController.rideHistoryList[index];
-                                return RideHistoryTab2(
-                                  buttonColor: const Color(0xFFFFDC71),
-                                  buttonText: "Done (${ride.pickupDate})",
-                                  googleMapChild: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                                    child: GoogleMap(
-                                      initialCameraPosition: CameraPosition(
-                                        target: LatLng(ride.pickupLat, ride.pickupLng),
-                                        zoom: 14,
+                      child: TabBarView(
+                        children: [
+                          ListView.builder(
+                            itemCount: 5,
+                            itemBuilder: (context, index) {
+                              return RideHistoryTab(
+                                imagePersion: "assets/icons/usericon.png",
+                                textPersion: "Justin Westervelt",
+                                imagelocation1: "assets/icons/Frame.png",
+                                textlocation1: "El-Baght Food Resmourants",
+                                imagelocation2: "assets/icons/location-08 (4).png",
+                                textlocation2: "El-Baght Food Resmourants",
+                                pricing: "120",
+                              );
+                            },
+                          ),
+                          ListView.builder(
+                            itemCount: 3,
+                            itemBuilder: (context, index) {
+                              return RideHistoryTab2(
+                                buttonColor: const Color(0xFFFFDC71),
+                                buttonText: "Done (2-2-21)",
+                                googleMapChild: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(16),
                                       ),
-                                      zoomControlsEnabled: false,
-                                      scrollGesturesEnabled: false,
-                                      zoomGesturesEnabled: false,
+                                      child: GoogleMap(
+                                        initialCameraPosition: const CameraPosition(
+                                          target: LatLng(23.8103, 90.4125),
+                                          zoom: 14,
+                                        ),
+                                        zoomControlsEnabled: false,
+                                        scrollGesturesEnabled: false,
+                                        zoomGesturesEnabled: false,
+                                      ),
                                     ),
+                                  ],
+                                ),
+                                widget: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: RideHistoryTab(
+                                    imagePersion: "assets/icons/usericon.png",
+                                    textPersion: "Justin Westervelt",
+                                    imagelocation1: "assets/icons/Frame.png",
+                                    textlocation1: "El-Baght Food Restaurants",
+                                    imagelocation2: "assets/icons/location-08 (4).png",
+                                    textlocation2: "Downtown City Mall",
+                                    pricing: "25.50",
                                   ),
-                                  widget: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: RideHistoryTab(
-                                      imagePersion: "assets/icons/usericon.png",
-                                      textPersion: ride.user?.fullName ?? "Unknown",
-                                      imagelocation1: "assets/icons/Frame.png",
-                                      textlocation1: ride.pickupLocation,
-                                      imagelocation2: "assets/icons/location-08 (4).png",
-                                      textlocation2: ride.dropOffLocation,
-                                      pricing: ride.totalAmount.toString(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      }),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

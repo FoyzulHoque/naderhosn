@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'choose_taxi_api_controller.dart';
 // Assuming the required models (RideDataModel, RidePlan, NearbyDriver) are accessible
 
+/*
 class ChooseTaxiController extends GetxController {
   final ChooseTaxiApiController apiController = Get.put(ChooseTaxiApiController());
 
@@ -176,5 +178,98 @@ class ChooseTaxiController extends GetxController {
       "assets/images/car.png",
     );
     customMarkerCar.value = icon;
+  }
+}*/
+
+
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart' show rootBundle, ByteData; // Required for _bitmapFromAsset
+import 'dart:ui' as ui; // Required for instantiateImageCodec, ImageByteFormat
+import '../controler/choose_taxi_api_controller.dart'; // Ensure this path is correct
+
+class DeliveryMapController extends GetxController {
+  // Ensure ChooseTaxiApiController is correctly put/found (it's needed by ExpandedBottomSheet)
+  final ChooseTaxiApiController apiController = Get.put(ChooseTaxiApiController());
+
+  final LatLng pickupLocation = LatLng(40.650002, -73.949997);
+  final LatLng deliveryLocation = LatLng(40.712776, -74.005974);
+
+  final markers = <Marker>{}.obs;
+  final polylines = <Polyline>{}.obs;
+
+  late BitmapDescriptor pickupIcon;
+  late BitmapDescriptor deliveryIcon;
+
+  GoogleMapController? mapController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadCustomIcons();
+  }
+
+  Future<void> _loadCustomIcons() async {
+    // Note: The original code had a missing import for ui.instantiateImageCodec
+    pickupIcon = await _bitmapFromAsset('assets/images/location1.png');
+    deliveryIcon = await _bitmapFromAsset2('assets/images/location2.png');
+    _setupMapData();
+  }
+
+  Future<BitmapDescriptor> _bitmapFromAsset(
+      String path, {
+        int width = 100,
+      }) async {
+    final ByteData byteData = await rootBundle.load(path);
+    final codec = await ui.instantiateImageCodec( // Use ui.instantiateImageCodec
+      byteData.buffer.asUint8List(),
+      targetWidth: width,
+    );
+    final frame = await codec.getNextFrame();
+    final data = await frame.image.toByteData(format: ui.ImageByteFormat.png); // Use ui.ImageByteFormat
+    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+  }
+
+  Future<BitmapDescriptor> _bitmapFromAsset2(
+      String path, {
+        int width = 150,
+      }) async {
+    final ByteData byteData = await rootBundle.load(path);
+    final codec = await ui.instantiateImageCodec( // Use ui.instantiateImageCodec
+      byteData.buffer.asUint8List(),
+      targetWidth: width,
+    );
+    final frame = await codec.getNextFrame();
+    final data = await frame.image.toByteData(format: ui.ImageByteFormat.png); // Use ui.ImageByteFormat
+    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+  }
+
+  void _setupMapData() {
+    final pickupMarker = Marker(
+      markerId: MarkerId('pickup'),
+      position: pickupLocation,
+      icon: pickupIcon,
+      infoWindow: InfoWindow(title: 'Pickup'),
+    );
+
+    final deliveryMarker = Marker(
+      markerId: MarkerId('delivery'),
+      position: deliveryLocation,
+      icon: deliveryIcon,
+      infoWindow: InfoWindow(title: 'Delivery'),
+    );
+
+    final polyline = Polyline(
+      polylineId: PolylineId('route'),
+      points: [pickupLocation, deliveryLocation],
+      color: const Color(0xFFFFDC72),
+      width: 8,
+      patterns: [PatternItem.dot, PatternItem.gap(10)], // DOTTED LINE
+    );
+
+    markers.value = {pickupMarker, deliveryMarker};
+    polylines.value = {polyline};
   }
 }

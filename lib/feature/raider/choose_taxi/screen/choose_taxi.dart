@@ -5,17 +5,16 @@ import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/choose_taxi/controler/choose_taxi_controller.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/screen/confirm_pickup.dart';
-
 import '../controler/choose_taxi_api_controller.dart';
 
-// Assuming globalTextStyle is defined elsewhere
 
 class ChooseTaxiScreen extends StatelessWidget {
-  final ChooseTaxiController controller = Get.put(ChooseTaxiController());
+  // The correct initialization line, assuming external cleanup is done.
+  final DeliveryMapController controller = Get.put(DeliveryMapController());
 
   @override
   Widget build(BuildContext context) {
-    // 🔹 Receive arguments from previous screen
+    // 🔹 Receive arguments from previous screen (Remains unused by new map logic)
     final args = Get.arguments ?? {};
     final pickup = args['pickup'] ?? "No pickup";
     final pickupLatArg = args['pickupLat'];
@@ -24,69 +23,40 @@ class ChooseTaxiScreen extends StatelessWidget {
     final dropOffLatArg = args['dropOffLat'];
     final dropOffLngArg = args['dropOffLng'];
 
-    // Convert to double safely
+    // Convert to double safely (Remains unused by new map logic)
     final double pLat = double.tryParse(pickupLatArg.toString()) ?? 0.0;
     final double pLng = double.tryParse(pickupLngArg.toString()) ?? 0.0;
     final double dLat = double.tryParse(dropOffLatArg.toString()) ?? 0.0;
     final double dLng = double.tryParse(dropOffLngArg.toString()) ?? 0.0;
 
-    // 💡 FIX: Call the loading method here after arguments are available
-    // Ensures controller receives LatLng data before API call
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Only load if data hasn't been loaded yet
-      if (controller.markerPosition.value == null && !controller.isLoading.value) {
-        controller.loadRideData(
-            pLat: pLat,
-            pLng: pLng,
-            dLat: dLat,
-            dLng: dLng
-        );
-      }
-    });
-
+    // NOTE: The old API arguments are ignored by the new DeliveryMapController's map setup.
 
     return Scaffold(
       body: Stack(
         children: [
           Obx(() {
-            // 1. Loading State
-            if (controller.isLoading.value) {
+            // Check if map data is ready after async icon loading.
+           /* if (controller.markers.value.isEmpty || controller.polylines.value.isEmpty) {
               return const Center(child: CircularProgressIndicator());
-            }
+            }*/
 
-            // 2. Failure State (markerPosition is null after loading)
-            if (controller.markerPosition.value == null) {
-              // Show a fallback map centered on the received pickup point if valid,
-              // otherwise show an error message.
-              if (pLat != 0.0 || pLng != 0.0) {
-                return GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(pLat, pLng),
-                    zoom: 15,
-                  ),
-                  // No markers/polylines loaded from API will be shown here
-                );
-              }
-              return const Center(child: Text("Map data could not be loaded."));
-            }
+            // Use the controller's fixed pickup location for initial map center.
+            final LatLng initialTarget = controller.pickupLocation;
 
-            // 3. Success State (Map is ready)
             return GoogleMap(
               initialCameraPosition: CameraPosition(
-                // ✅ FIX: Use the null assertion operator '!'
-                target: controller.markerPosition.value!,
+                target: initialTarget,
                 zoom: 15,
               ),
-
-              // Markers (Pickup, Dropoff, and Nearby Cars)
               markers: controller.markers.value,
-
-              // Polyline between Pickup and Dropoff
-              polylines: {
-                controller.polyline.value,
+              polylines: controller.polylines.value,
+              onMapCreated: (GoogleMapController mapController) {
+                controller.mapController = mapController;
               },
             );
           }),
+
+          // Header Text
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 60),
             child: Text(
@@ -98,13 +68,15 @@ class ChooseTaxiScreen extends StatelessWidget {
               ),
             ),
           ),
-          // 🔹 Show pickup/dropOff data on screen (Uncommented for utility)
+          // NOTE: ExpandedBottomSheet still relies on ChooseTaxiApiController
           ExpandedBottomSheet(),
         ],
       ),
     );
   }
 }
+
+
 class ExpandedBottomSheet extends StatelessWidget {
   ExpandedBottomSheet({super.key});
 
@@ -114,13 +86,24 @@ class ExpandedBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      // Ensure the bottom sheet can handle the loading state from its own controller
       if (controller2.rideDataList.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
+        // Show a loading indicator at the bottom
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            height: 100,
+            color: Colors.white,
+            alignment: Alignment.center,
+            child: const CircularProgressIndicator(),
+          ),
+        );
       }
 
       final data = controller2.rideDataList.first;
-      final data2 =
-      data.carTransport != null && data.carTransport!.isNotEmpty
+
+      // Data will be null if the API response is missing the 'carTransport' array/field.
+      final data2 = data.carTransport != null && data.carTransport!.isNotEmpty
           ? data.carTransport!.first
           : null;
 
@@ -171,6 +154,7 @@ class ExpandedBottomSheet extends StatelessWidget {
                   const Divider(),
                   Align(
                     alignment: Alignment.center,
+                    // NOTE: Ensure this asset path is correct
                     child: Image.asset(
                       "assets/images/car2.png",
                       width: MediaQuery.of(context).size.width * 0.5,
@@ -187,7 +171,10 @@ class ExpandedBottomSheet extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        data2 != null ? "\$${data2.totalAmount}" : "--",
+                        // ✅ FIX: Safely access totalAmount and explicitly convert to String
+                        data2 != null
+                            ? "\$${data2.totalAmount?.toString() ?? '--'}"
+                            : "--",
                         style: globalTextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -196,7 +183,8 @@ class ExpandedBottomSheet extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    data2?.pickupTime ?? "--",
+                    // ✅ FIX: Safely access pickupTime and use toString() for robustness
+                    data2?.pickupTime?.toString() ?? "--",
                     style: globalTextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -216,6 +204,7 @@ class ExpandedBottomSheet extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
+                      // NOTE: Ensure this asset path is correct
                       Image.asset(
                         "assets/images/card.png",
                         width: 45,
@@ -251,4 +240,3 @@ class ExpandedBottomSheet extends StatelessWidget {
     });
   }
 }
-
