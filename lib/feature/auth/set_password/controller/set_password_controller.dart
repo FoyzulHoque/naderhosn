@@ -28,7 +28,7 @@ class SetPasswordController extends GetxController {
   var confirmpasswordController = TextEditingController();
 
   Future<void> setpassword() async {
-    final url = Uri.parse('${Urls.baseUrl}/auth/reset-password');
+    final url = Uri.parse('${Urls.resetPassword}');
 
     try {
       EasyLoading.show(status: 'Logging in...');
