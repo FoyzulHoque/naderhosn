@@ -1,4 +1,5 @@
 class Urls {
+
   static const String _baseUrl = 'https://brother-taxi.onrender.com/api/v1';
   static const String socketUrl = 'ws://brother-taxi.onrender.com';
   static const String login = '$_baseUrl/auth/login';
@@ -7,12 +8,11 @@ class Urls {
   static const String logout = '$_baseUrl/auth/logout';
   static const String forgotPass = '$_baseUrl/auth/forgot-password';
   static const String pickUpLocation = '$_baseUrl/carTransports/ride-plan';
-  static const String carTransportsCreate= '$_baseUrl/carTransports/create';
   static const String carTransportsMyRidePlans = '$_baseUrl/carTransports/my-ride-plans';
+  static const String carTransportsCreate = '$_baseUrl/carTransports/create';
+
   static String getCalendar(String date, String locationUuid) =>
       '$_baseUrl/calendar?date=$date&pickup_location_uuid=$locationUuid';
 
-
-  static const String googleApiKey="AIzaSyC7AoMhe2ZP3iHflCVr6a3VeL0ju0bzYVE";
-
+  static const String googleApiKey = "AIzaSyC7AoMhe2ZP3iHflCVr6a3VeL0ju0bzYVE";
 }

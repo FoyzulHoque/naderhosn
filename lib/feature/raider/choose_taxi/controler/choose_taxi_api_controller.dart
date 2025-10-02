@@ -3,7 +3,6 @@ import 'package:naderhosn/core/network_caller/network_config.dart';
 import 'package:naderhosn/core/services_class/data_helper.dart';
 import '../../../../core/network_caller/endpoints.dart';
 import '../model/choose_taxi_model.dart';
-import '../model/location_searching_model.dart';
 
 class ChooseTaxiApiController extends GetxController {
   // Observables

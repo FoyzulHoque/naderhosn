@@ -5,9 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:naderhosn/core/services_class/data_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/shared_preference/shared_preferences_helper.dart';
 import '../service/chat_service.dart';
-import '../../../../core/network_caller/endpoints.dart';
 
 class ChatController extends GetxController {
   final WebSocketService webSocketService = WebSocketService();

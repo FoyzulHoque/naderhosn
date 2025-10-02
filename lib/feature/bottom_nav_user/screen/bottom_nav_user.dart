@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/const/nav_bar_images.dart';
 import 'package:naderhosn/feature/bottom_nav_user/controller/bottom_nav_user_controller.dart';
-import 'package:naderhosn/feature/raider/chat/screen/chat.dart';
 import 'package:naderhosn/feature/raider/cost_calculate/screen/cost_calculate.dart';
 import 'package:naderhosn/feature/raider/home/screen/home.dart';
 import 'package:naderhosn/feature/raider/profile/screen/profile_screen.dart';
