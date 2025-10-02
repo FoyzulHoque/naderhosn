@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup_controller.dart';
-import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet1.dart' hide globalTextStyle, ConfirmPickupController;
+import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet1.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet2.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet3.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet4.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet5.dart';
 
-import '../../../../core/style/global_text_style.dart';
-import '../../choose_taxi/controler/choose_taxi_controller.dart';
 
 class ConfirmPickUpScreen extends StatelessWidget {
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());
-  final ChooseTaxiController chooseTaxiController = Get.put(ChooseTaxiController());
-
 
   ConfirmPickUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments as Map<String, dynamic>? ?? {};
+
+   /* final args = Get.arguments as Map<String, dynamic>? ?? {};
     final String pickupAddress = args['pickup'] as String? ?? "No pickup address";
     final pickupLatArg = args['pickupLat'];
     final pickupLngArg = args['pickupLng'];
@@ -36,9 +34,9 @@ class ConfirmPickUpScreen extends StatelessWidget {
     final double pLat = double.tryParse(pickupLatArg?.toString() ?? '0.0') ?? 0.0;
     final double pLng = double.tryParse(pickupLngArg?.toString() ?? '0.0') ?? 0.0;
     final double dLat = double.tryParse(dropOffLatArg?.toString() ?? '0.0') ?? 0.0;
-    final double dLng = double.tryParse(dropOffLngArg?.toString() ?? '0.0') ?? 0.0;
+    final double dLng = double.tryParse(dropOffLngArg?.toString() ?? '0.0') ?? 0.0;*/
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+   /* WidgetsBinding.instance.addPostFrameCallback((_) {
       if (pLat != 0.0 || pLng != 0.0 || dLat != 0.0 || dLng != 0.0) {
         print("ChooseTaxiScreen: Calling loadAndDisplayRideData with arguments from previous screen.");
         chooseTaxiController.loadAndDisplayRideData(
@@ -50,48 +48,50 @@ class ConfirmPickUpScreen extends StatelessWidget {
           initialDropOffLng: dLng,
         );
       }
-    });
+    });*/
+
+
 
     return Scaffold(
       body: Stack(
         children: [
           Obx(() {
-            print("Rendering GoogleMap with ${chooseTaxiController.markers.length} markers");
-            if (chooseTaxiController.isLoadingMap.value || (chooseTaxiController.isLoadingDirections.value && chooseTaxiController.markers.isEmpty)) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (chooseTaxiController.apiController.errorMessage.value.isNotEmpty && chooseTaxiController.markers.isEmpty) {
-              return Center(child: Text("Error: ${chooseTaxiController.apiController.errorMessage.value}"));
-            }
-
-            if (chooseTaxiController.pickupPosition.value == null && chooseTaxiController.markers.isEmpty) {
-              if (pLat != 0.0 || pLng != 0.0) {
-                print("ChooseTaxiScreen: Displaying fallback map with arguments.");
-                return GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(pLat, pLng),
-                    zoom: 15,
-                  ),
-                  onMapCreated: chooseTaxiController.onMapCreated,
-                );
-              }
-              return const Center(child: Text("Map data could not be loaded or no ride found."));
-            }
-
-            return GoogleMap(
+            return controller.isLoading.value
+                ? const Center(child: CircularProgressIndicator())
+                : GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: chooseTaxiController.pickupPosition.value ??
-                    LatLng(pLat != 0.0 ? pLat : 23.749341, pLng != 0.0 ? pLng : 90.437213),
+                target: controller.pickupPosition.value ?? const LatLng(23.749341, 90.437213),
                 zoom: 15,
               ),
-              markers: controller.markers,
-              polylines: controller.polyline.value.points.isNotEmpty
-                  ? {controller.polyline.value}
-                  : <Polyline>{},
-              onMapCreated: chooseTaxiController.onMapCreated,
+              markers: controller.markers.value,
+              polylines: controller.polylines.value, // Show multiple polylines
             );
           }),
+          // Overlay for distance and ETA
+          Positioned(
+            top: 100,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
+              ),
+              child: Column(
+                children: [
+                  Obx(() => Text(
+                    "Driver Distance: ${controller.driverDistance.value}",
+                    style: globalTextStyle(fontSize: 14, color: Colors.black),
+                  )),
+                  Obx(() => Text(
+                    "ETA: ${controller.etaMinutes.value}",
+                    style: globalTextStyle(fontSize: 14, color: Colors.green, fontWeight: FontWeight.bold),
+                  )),
+                ],
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 60),
             child: Text(
@@ -108,7 +108,6 @@ class ConfirmPickUpScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget buildBottomSheet(int value) {
     switch (value) {
       case 1:
