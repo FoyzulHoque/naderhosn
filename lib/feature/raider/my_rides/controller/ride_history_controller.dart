@@ -3,34 +3,26 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import '../../../../core/network_caller/network_config.dart';
 import '../../../../core/network_path/natwork_path.dart';
 import '../../../../core/services_class/shared_preferences_helper.dart';
-import '../model/my_ride_model.dart';
+import '../model/ride_history_model.dart';
 
-class MyRidesController extends GetxController {
+class RideHistoryController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = "".obs;
-  var myRides = <MyRideModel>[].obs;
-  var currentTabIndex = 0.obs; // Added missing variable
+  var rideHistoryList = <RideHistoryModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    // You can listen to tab changes if needed
-    ever(currentTabIndex, (index) {
-      print("Current tab changed to: $index");
-    });
-
-    // Fetch rides initially
-    fetchMyRides();
+    fetchRideHistory();
   }
 
-  /// Fetch My Rides
-  Future<void> fetchMyRides() async {
+  /// Fetch Ride History
+  Future<void> fetchRideHistory() async {
     isLoading.value = true;
     errorMessage.value = "";
-    EasyLoading.show(status: "Fetching rides...");
+    EasyLoading.show(status: "Fetching ride history...");
 
     try {
-      // Token
       final token = await SharedPreferencesHelper.getAccessToken();
       if (token == null || token.isEmpty) {
         errorMessage.value = "Access token not found. Please login.";
@@ -38,31 +30,28 @@ class MyRidesController extends GetxController {
         return;
       }
 
-      // Headers
       Map<String, String> headers = {
         "Authorization": token,
         "Content-Type": "application/json",
       };
 
-      // Call API
       NetworkResponse response = await NetworkCall.getRequest(
-        url: NetworkPath.myRides, // /carTransports/my-rides
+        url: NetworkPath.myRidesHistory,
         headers: headers,
       );
 
       if (response.isSuccess) {
         final data = response.responseData?["data"];
         if (data != null && data is List) {
-          myRides.value = data
-              .map((e) => MyRideModel.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
+          rideHistoryList.value =
+              data.map((e) => RideHistoryModel.fromJson(e)).toList();
         } else {
-          myRides.clear();
+          rideHistoryList.clear();
         }
-        EasyLoading.showSuccess("Rides fetched successfully");
+        EasyLoading.showSuccess("Ride history fetched successfully");
       } else {
         errorMessage.value =
-            response.errorMessage ?? "Failed to load rides";
+            response.errorMessage ?? "Failed to load ride history";
         EasyLoading.showError(errorMessage.value);
       }
     } catch (e) {
@@ -72,10 +61,5 @@ class MyRidesController extends GetxController {
       isLoading.value = false;
       EasyLoading.dismiss();
     }
-  }
-
-  /// Change tab index
-  void changeTab(int index) {
-    currentTabIndex.value = index;
   }
 }

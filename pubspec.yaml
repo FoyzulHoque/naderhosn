@@ -67,8 +67,13 @@ dependencies:
   intl_phone_field: ^3.2.0
   url_launcher: ^6.3.1
   logger: ^2.6.1
+
   web_socket_channel: ^3.0.3
 
+
+  flutter_google_places_sdk: ^0.4.2+1
+  
+  
 
 dev_dependencies:
   flutter_test:

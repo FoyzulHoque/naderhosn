@@ -13,6 +13,11 @@ void main() async {
 
   Get.put(ChatController());
 
+
+import 'feature/raider/cost_calculate/screen/cost_calculate.dart';
+import 'feature/raider/cost_calculate/screen/cost_calculate_location.dart';
+
+void main() {
   runApp(const MyApp());
 }
 
