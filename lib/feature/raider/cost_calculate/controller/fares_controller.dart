@@ -28,7 +28,7 @@ class FaresController extends GetxController {
       }
 
       Map<String, String> headers = {
-        "Authorization": "Bearer $token",
+        "Authorization": token,
         "Content-Type": "application/json",
       };
 
