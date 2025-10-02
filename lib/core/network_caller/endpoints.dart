@@ -10,6 +10,9 @@ class Urls {
   static const String pickUpLocation = '$_baseUrl/carTransports/ride-plan';
   static const String carTransportsMyRidePlans = '$_baseUrl/carTransports/my-ride-plans';
   static const String carTransportsCreate = '$_baseUrl/carTransports/create';
+  static const String paymentsCreateCard = '$_baseUrl/payments/create-card';
+  static const String paymentsSavedCards = '$_baseUrl/payments/saved-cards';
+  static const String paymentsCardPayment = '$_baseUrl/payments/card-payment';
 
   static String getCalendar(String date, String locationUuid) =>
       '$_baseUrl/calendar?date=$date&pickup_location_uuid=$locationUuid';

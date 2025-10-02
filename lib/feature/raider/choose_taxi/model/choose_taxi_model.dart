@@ -1,15 +1,10 @@
 import 'dart:convert';
-
 import 'location_searching_model.dart';
-// Assuming NearbyDriverModel is in the same file or import it
-// import 'nearby_driver_model.dart'; // If in a separate file
 
 class RidePlan2 {
   final String? id;
   final String? userId;
   final String? pickup;
-  final String? pickupDate;
-  final String? pickupTime;
   final String? dropOff;
   final double? pickupLat;
   final double? pickupLng;
@@ -20,19 +15,17 @@ class RidePlan2 {
   final double? distance;
   final int? estimatedFare;
   final String? serviceType;
+  final String? pickupDate;
+  final String? pickupTime;
   final String? createdAt;
   final String? updatedAt;
-
-  final List<NearbyDriver>? availableDrivers;
-
   final List<CarTransport>? carTransport;
+  final List<NearbyDriver>? nearbyDrivers;
 
   RidePlan2({
     this.id,
     this.userId,
     this.pickup,
-    this.pickupDate,
-    this.pickupTime,
     this.dropOff,
     this.pickupLat,
     this.pickupLng,
@@ -43,47 +36,42 @@ class RidePlan2 {
     this.distance,
     this.estimatedFare,
     this.serviceType,
+    this.pickupDate,
+    this.pickupTime,
     this.createdAt,
     this.updatedAt,
-    this.availableDrivers,
     this.carTransport,
+    this.nearbyDrivers,
   });
 
   factory RidePlan2.fromJson(Map<String, dynamic> json) {
-    List<NearbyDriver>? parsedAvailableDrivers;
-    if (json['nearbyDrivers'] != null && json['nearbyDrivers'] is List) {
-      parsedAvailableDrivers = (json['nearbyDrivers'] as List<dynamic>)
-          .map((e) => NearbyDriver.fromJson(e as Map<String, dynamic>))
-          .toList();
-    }
-
-    List<CarTransport>? parsedCarTransport;
-    if (json['carTransport'] != null && json['carTransport'] is List) {
-      parsedCarTransport = (json['carTransport'] as List<dynamic>)
-          .map((e) => CarTransport.fromJson(e as Map<String, dynamic>))
-          .toList();
-    }
+    var driversFromJson = json['nearbyDrivers'] as List<dynamic>?;
+    List<NearbyDriver>? driversList = driversFromJson
+        ?.map((driver) => NearbyDriver.fromJson(driver as Map<String, dynamic>))
+        .toList();
 
     return RidePlan2(
-      id: json['id'] as String?,
-      userId: json['userId'] as String?,
-      pickup: json['pickup'] as String?,
-      pickupDate: json['pickupDate'] as String?,
-      pickupTime: json['pickupTime'] as String?,
-      dropOff: json['dropOff'] as String?,
+      id: json['id'],
+      userId: json['userId'],
+      pickup: json['pickup'],
+      dropOff: json['dropOff'],
       pickupLat: (json['pickupLat'] as num?)?.toDouble(),
       pickupLng: (json['pickupLng'] as num?)?.toDouble(),
       dropOffLat: (json['dropOffLat'] as num?)?.toDouble(),
       dropOffLng: (json['dropOffLng'] as num?)?.toDouble(),
-      rideTime: json['rideTime'] as int?,
-      waitingTime: json['waitingTime'] as int?,
+      rideTime: json['rideTime'],
+      waitingTime: json['waitingTime'],
       distance: (json['distance'] as num?)?.toDouble(),
-      estimatedFare: json['estimatedFare'] as int?,
-      serviceType: json['serviceType'] as String?,
-      createdAt: json['createdAt'] as String?,
-      updatedAt: json['updatedAt'] as String?,
-      availableDrivers: parsedAvailableDrivers,
-      carTransport: parsedCarTransport,
+      estimatedFare: json['estimatedFare'],
+      serviceType: json['serviceType'],
+      pickupDate: json['pickupDate'],
+      pickupTime: json['pickupTime'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      carTransport: (json['carTransport'] as List<dynamic>?)
+          ?.map((e) => CarTransport.fromJson(e))
+          .toList(),
+      nearbyDrivers: driversList,
     );
   }
 
@@ -92,8 +80,6 @@ class RidePlan2 {
       "id": id,
       "userId": userId,
       "pickup": pickup,
-      "pickupDate": pickupDate,
-      "pickupTime": pickupTime,
       "dropOff": dropOff,
       "pickupLat": pickupLat,
       "pickupLng": pickupLng,
@@ -104,15 +90,17 @@ class RidePlan2 {
       "distance": distance,
       "estimatedFare": estimatedFare,
       "serviceType": serviceType,
+      "pickupDate": pickupDate,
+      "pickupTime": pickupTime,
       "createdAt": createdAt,
       "updatedAt": updatedAt,
-      "availableDrivers": availableDrivers?.map((e) => e.toJson()).toList(),
       "carTransport": carTransport?.map((e) => e.toJson()).toList(),
+      "nearbyDrivers": nearbyDrivers?.map((e) => e.toJson()).toList(),
     };
   }
 
   static List<RidePlan2> listFromJson(String str) =>
-      List<RidePlan2>.from(json.decode(str).map((x) => RidePlan2.fromJson(x as Map<String,dynamic>)));
+      List<RidePlan2>.from(json.decode(str).map((x) => RidePlan2.fromJson(x)));
 
   static String listToJson(List<RidePlan2> data) =>
       json.encode(data.map((x) => x.toJson()).toList());
@@ -199,43 +187,43 @@ class CarTransport {
 
   factory CarTransport.fromJson(Map<String, dynamic> json) {
     return CarTransport(
-      id: json['id'] as String?,
-      userId: json['userId'] as String?,
-      vehicleId: json['vehicleId'] as String?,
-      pickupLocation: json['pickupLocation'] as String?,
-      dropOffLocation: json['dropOffLocation'] as String?,
+      id: json['id'],
+      userId: json['userId'],
+      vehicleId: json['vehicleId'],
+      pickupLocation: json['pickupLocation'],
+      dropOffLocation: json['dropOffLocation'],
       pickupLat: (json['pickupLat'] as num?)?.toDouble(),
       pickupLng: (json['pickupLng'] as num?)?.toDouble(),
       dropOffLat: (json['dropOffLat'] as num?)?.toDouble(),
       dropOffLng: (json['dropOffLng'] as num?)?.toDouble(),
       driverLat: (json['driverLat'] as num?)?.toDouble(),
       driverLng: (json['driverLng'] as num?)?.toDouble(),
-      totalAmount: json['totalAmount'] as int?,
+      totalAmount: json['totalAmount'],
       distance: (json['distance'] as num?)?.toDouble(),
-      platformFee: json['platformFee'] as int?,
-      platformFeeType: json['platformFeeType'] as String?,
-      paymentMethod: json['paymentMethod'] as String?,
-      paymentStatus: json['paymentStatus'] as String?,
-      isPayment: json['isPayment'] as bool?,
-      pickupDate: json['pickupDate'] as String?,
-      pickupTime: json['pickupTime'] as String?,
-      rideTime: json['rideTime'] as int?,
-      waitingTime: json['waitingTime'] as int?,
-      status: json['status'] as String?,
-      assignedDriver: json['assignedDriver'] as String?,
-      assignedDriverReqStatus: json['assignedDriverReqStatus'] as String?,
-      isDriverReqCancel: json['isDriverReqCancel'] as bool?,
-      arrivalConfirmation: json['arrivalConfirmation'] as bool?,
-      journeyStarted: json['journeyStarted'] as bool?,
-      journeyCompleted: json['journeyCompleted'] as bool?,
-      serviceType: json['serviceType'] as String?,
-      specialNotes: json['specialNotes'] as String?,
-      beforePickupImages: json['beforePickupImages'] as List<dynamic>?,
-      afterPickupImages: json['afterPickupImages'] as List<dynamic>?,
-      cancelReason: json['cancelReason'] as String?,
-      createdAt: json['createdAt'] as String?,
-      updatedAt: json['updatedAt'] as String?,
-      ridePlanId: json['ridePlanId'] as String?,
+      platformFee: json['platformFee'],
+      platformFeeType: json['platformFeeType'],
+      paymentMethod: json['paymentMethod'],
+      paymentStatus: json['paymentStatus'],
+      isPayment: json['isPayment'],
+      pickupDate: json['pickupDate'],
+      pickupTime: json['pickupTime'],
+      rideTime: json['rideTime'],
+      waitingTime: json['waitingTime'],
+      status: json['status'],
+      assignedDriver: json['assignedDriver'],
+      assignedDriverReqStatus: json['assignedDriverReqStatus'],
+      isDriverReqCancel: json['isDriverReqCancel'],
+      arrivalConfirmation: json['arrivalConfirmation'],
+      journeyStarted: json['journeyStarted'],
+      journeyCompleted: json['journeyCompleted'],
+      serviceType: json['serviceType'],
+      specialNotes: json['specialNotes'],
+      beforePickupImages: json['beforePickupImages'],
+      afterPickupImages: json['afterPickupImages'],
+      cancelReason: json['cancelReason'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      ridePlanId: json['ridePlanId'],
     );
   }
 
