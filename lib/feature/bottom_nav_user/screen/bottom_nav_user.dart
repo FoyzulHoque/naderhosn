@@ -2,15 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/const/nav_bar_images.dart';
 import 'package:naderhosn/feature/bottom_nav_user/controller/bottom_nav_user_controller.dart';
-import 'package:naderhosn/feature/raider/chat/screen/chat.dart';
 import 'package:naderhosn/feature/raider/cost_calculate/screen/cost_calculate.dart';
 import 'package:naderhosn/feature/raider/home/screen/home.dart';
 import 'package:naderhosn/feature/raider/profile/screen/profile_screen.dart';
+
+import '../../friends/screen/chat_screen.dart';
 
 class BottomNavbarUser extends StatelessWidget {
   BottomNavbarUser({super.key});
 
   final BottomNavUserController controller = Get.put(BottomNavUserController());
+
+
+  final String carTransportId = "68dac36a9d6556e4d3aa05eb";
+
+  late final List<Widget> pages = [
+    HomeScreen(),
+    CostCalculate(),
+    ChatScreen(carTransportId: carTransportId),
+    ProfileScreen(),
+  ];
+
+  Future<bool> _onWillPop(BuildContext context) async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Exit App'),
+            content: Text('Do you really want to exit the app?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: Text('Yes'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
 
   @override
   Widget build(BuildContext context) {

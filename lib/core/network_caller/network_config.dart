@@ -450,6 +450,7 @@ class NetworkCall {
   static Future<NetworkResponse> multipartRequest({
     required String url,
     Map<String, String>? fields,
+    Map<String, dynamic>? body,
     File? imageFile,
     File? videoFile,
     required String methodType,
@@ -461,7 +462,7 @@ class NetworkCall {
       // Add Authorization header
       if (AuthController.accessToken != null &&
           AuthController.accessToken!.isNotEmpty) {
-        request.headers['Authorization'] = 'Bearer ${AuthController.accessToken!}';
+        request.headers['Authorization'] = AuthController.accessToken!;
       }
 
       // Add fields (e.g. name, email)
@@ -488,7 +489,7 @@ class NetworkCall {
       }
 
       // Send request
-      _logRequest(url, request.headers, requestBody: fields);
+      _logRequest(url, request.headers, requestBody: fields, );
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 

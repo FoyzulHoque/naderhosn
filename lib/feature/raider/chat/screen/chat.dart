@@ -1,6 +1,9 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/feature/raider/chat/controller/chat_controller.dart';
+
+import '../../../friends/controller/chat_controller.dart';
 
 class ChatScreen extends StatelessWidget {
   final ChatController controller = Get.put(ChatController());
@@ -91,3 +94,4 @@ class ChatScreen extends StatelessWidget {
     );
   }
 }
+*/

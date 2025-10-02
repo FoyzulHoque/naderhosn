@@ -4,10 +4,15 @@ import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup_controller.dart';
 import 'package:url_launcher/url_launcher.dart' show launch;
 
+import '../../../friends/screen/chat_screen.dart';
+
+
 class ExpandedBottomSheet6 extends StatelessWidget {
   ExpandedBottomSheet6({super.key});
 
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());
+
+  final String carTransportId = "68dac36a9d6556e4d3aa05eb";
 
   @override
   Widget build(BuildContext context) {
@@ -226,26 +231,22 @@ class ExpandedBottomSheet6 extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFFDC71),
-                          borderRadius: BorderRadius.circular(15),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey[200],
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.chat, color: Colors.black),
-                            SizedBox(width: 10),
-                            Text(
-                              'Send a message',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        label: const Text("Chat"),
+                        onPressed: () {
+                          Get.to(ChatScreen(carTransportId: carTransportId));
+                        },
                       ),
                     ),
                     SizedBox(width: 15),
