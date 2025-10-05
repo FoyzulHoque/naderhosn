@@ -1,17 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
-import 'package:naderhosn/feature/raider/profile/widget/profile_image.dart';
+import '../controller/profile_edit_controller.dart';
 
-import '../../../text editing_controller/rider_text_editing_controller_.dart';
-
-class ProfileEditScreen extends StatelessWidget {
+class ProfileEditScreen extends StatefulWidget {
   ProfileEditScreen({super.key});
 
-  final RiderTextEditingController riderTextEditingController=Get.put(RiderTextEditingController());
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneNumberController = TextEditingController();
-  final TextEditingController imageController = TextEditingController();
+  @override
+  State<ProfileEditScreen> createState() => _ProfileEditScreenState();
+}
+
+class _ProfileEditScreenState extends State<ProfileEditScreen> {
+  var updateProfileController = Get.find<UpdateProfileController>();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfileData();
+  }
+
+  void fetchProfileData() async {
+    final profile = await updateProfileController.fetchMyProfile();
+    if (profile?.profileImage != null) {
+      updateProfileController.fullNameController.text = profile!.fullName ?? '';
+      updateProfileController.emailController.text = profile!.email ?? '';
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,64 +37,75 @@ class ProfileEditScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios),
         ),
         title: const Text('Profile'),
-        // titleTextStyle: h55TextStyle(darkNavyBlue),
         centerTitle: true,
-        //  backgroundColor: lightPinkishWhite,
         elevation: 0,
       ),
-      // backgroundColor: lightPinkishWhite,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             const SizedBox(height: 16),
-            ProfileImage(),
+
+            Obx(() {
+              final profileImage = updateProfileController.userData.value?.profileImage ?? '';
+              final selectedImage = updateProfileController.selectedImage.value;
+
+              return Center(
+                child: GestureDetector(
+                  onTap: updateProfileController.pickImage,
+                  child: CircleAvatar(
+                    radius: 80,
+                    backgroundImage: selectedImage != null
+                        ? FileImage(selectedImage)
+                        : (profileImage.isNotEmpty
+                        ? NetworkImage(profileImage)
+                        : const AssetImage('assets/images/default_avatar.png') as ImageProvider),
+                  ),
+                ),
+              );
+            }),
+
+
             const SizedBox(height: 24),
 
             // Name Field
             TextFormField(
-              controller:riderTextEditingController.riderName,
+              controller: updateProfileController.fullNameController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 hintText: "Name",
-                hintStyle: const TextStyle(
-                  // Ensures visibility
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                hintStyle: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ),
+
             const SizedBox(height: 12),
 
-            // Phone Number Field
+            // Email Field
             TextFormField(
-              controller:riderTextEditingController.riderPhone,
-              keyboardType: TextInputType.phone,
+              controller: updateProfileController.emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                hintText: "Phone Number",
-                hintStyle: const TextStyle(
-                  // Ensures visibility
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                hintText: "Email",
+                hintStyle: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ),
 
-            const SizedBox(height: 40),
-
-            Spacer(),
+            const Spacer(),
 
             CustomButton(
               title: "Save",
-              backgroundColor: Color(0xFfFFDC71),
+              backgroundColor: const Color(0xFfFFDC71),
               borderColor: Colors.transparent,
-              onPress: () {},
+              onPress: () async {
+                updateProfileController.updateUserProfile();
+              },
             ),
+
 
             const SizedBox(height: 30),
           ],
@@ -87,4 +113,5 @@ class ProfileEditScreen extends StatelessWidget {
       ),
     );
   }
+
 }

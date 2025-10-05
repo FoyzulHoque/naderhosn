@@ -2,22 +2,26 @@ import 'dart:convert';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:naderhosn/core/network_caller/endpoints.dart';
+import 'package:naderhosn/core/services_class/data_helper.dart';
+import '../../location_picker/controller/location_picker_controller.dart';
 import '../model/fare_model.dart';
+import '../model/calculated_fare_model.dart';
 
 class FareController extends GetxController {
   var isLoading = false.obs;
   var fare = Rxn<FareModel>();
+  var calculatedFare = Rxn<CalculatedFareModel>();
 
-  /// =======================
-  /// Fetch Fare Data
-  /// =======================
+  var locationPickerController = Get.put(()=> LocationPickerController());
+
   Future<void> fetchFareData(String token) async {
     try {
       isLoading.value = true;
       print("🔄 Fetching fare data...");
 
       final response = await http.get(
-        Uri.parse("https://brother-taxi.onrender.com/api/v1/estimateFares/getMyEstimatelist"),
+        Uri.parse("${Urls.baseURL}/estimateFares/getMyEstimatelist"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": token,  // ✅ raw token use
@@ -31,10 +35,12 @@ class FareController extends GetxController {
         final data = json.decode(response.body);
 
         if (data is Map<String, dynamic> && data.containsKey("data")) {
-          final fareData = data["data"];
-          fare.value = FareModel.fromJson(fareData);
-          print("✅ Fare loaded: ${fare.value}");
-        } else {
+          final fareList = data["data"] as List<dynamic>;
+          if (fareList.isNotEmpty) {
+            fare.value = FareModel.fromJson(fareList.first);
+          }
+        }
+        else {
           print("❌ Invalid data format received: $data");
           Get.snackbar("Error", "Invalid data format received");
         }
@@ -51,49 +57,70 @@ class FareController extends GetxController {
     }
   }
 
-  /// =======================
-  /// Send Pickup & DropOff Location
-  /// =======================
-  Future<void> sendPickupDropLocation({
+
+  Future<Map<String, dynamic>?> calculateFare({
     required String pickup,
     required String dropOff,
     required double pickupLat,
     required double pickupLng,
-    required double dropLat,
-    required double dropLng,
+    required double dropOffLat,
+    required double dropOffLng,
   }) async {
     try {
-      print("🔄 Sending pickup/drop-off location...");
+      isLoading.value = true;
+      print("🔄 Calculating fare with backend...");
+
+      final url = Uri.parse('${Urls.baseURL}/estimateFares/calculate-fare');
+      final token = AuthController.accessToken;
+
+      final headers = <String, String>{
+        'Authorization': token ?? '',
+        'Content-Type': 'application/json',
+      };
 
       final body = jsonEncode({
         "pickup": pickup,
         "dropOff": dropOff,
-        "pickupLocation": {"lat": pickupLat, "lng": pickupLng},
-        "dropOffLocation": {"lat": dropLat, "lng": dropLng},
+        "pickupLat": pickupLat,
+        "pickupLng": pickupLng,
+        "dropOffLat": dropOffLat,
+        "dropOffLng": dropOffLng
       });
 
-      final response = await http.post(
-        Uri.parse("https://brother-taxi.onrender.com/api/v1/estimateFares/calculate-fare"), // তোমার API endpoint
-        headers: {"Content-Type": "application/json"},
-        body: body,
-      );
+      print("📤 Sending data: $body");
+
+      final response = await http.post(url, headers: headers, body: body);
 
       print("📡 API Status: ${response.statusCode}");
       print("📥 API Response: ${response.body}");
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        print("✅ Pickup/Drop-off location sent successfully");
-        // যদি response-এ fare আসে, update করতে পারো:
+      if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data["success"] == true && data.containsKey("data")) {
-          fare.value = FareModel.fromJson(data["data"]);
-          print("✅ Fare updated from location API: ${fare.value}");
+        print("✅ Fare calculated successfully");
+        print("📊 Response data: $data");
+        
+        // Parse the calculated fare from response
+        if (data is Map<String, dynamic> && data.containsKey("data")) {
+          final fareData = data["data"] as Map<String, dynamic>;
+          calculatedFare.value = CalculatedFareModel.fromJson(fareData);
+          print("✅ Calculated fare parsed: ${calculatedFare.value?.totalFare}");
+        } else {
+          print("❌ Invalid response structure: $data");
         }
+        
+        return data;
       } else {
-        print("❌ Failed to send pickup/drop-off. Status: ${response.statusCode}");
+        print('❌ Error: ${response.statusCode}');
+        print('❌ Response: ${response.body}');
+        Get.snackbar("Error", "Failed to calculate fare: ${response.statusCode}");
+        return null;
       }
     } catch (e) {
-      print("⚠️ Exception sending pickup/drop-off: $e");
+      print("❌ Exception in calculateFare: $e");
+      Get.snackbar("Error", "Failed to calculate fare: $e");
+      return null;
+    } finally {
+      isLoading.value = false;
     }
   }
 

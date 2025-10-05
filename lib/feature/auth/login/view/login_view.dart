@@ -12,8 +12,7 @@ import '../widget/backgroundimage.dart';
 class LoginView extends StatelessWidget {
   LoginView({super.key});
 
-  final UserTextEditingController adminTextEditingController =
-  Get.put(UserTextEditingController());
+  final UserTextEditingController adminTextEditingController = Get.put(UserTextEditingController());
   GlobalKey<FormState> _globalKey=GlobalKey<FormState>();
   final LoginApiRiderController loginApiRiderController = Get.put(LoginApiRiderController());
 

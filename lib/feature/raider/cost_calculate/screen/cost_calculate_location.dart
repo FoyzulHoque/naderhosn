@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// Assuming these imports exist in your project
 import 'package:naderhosn/core/global_widegts/appBar.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
-import 'package:naderhosn/core/network_caller/network_config.dart';
 import 'package:naderhosn/core/services_class/data_helper.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
-import 'package:naderhosn/feature/raider/choose_taxi/screen/choose_taxi.dart';
 import 'package:naderhosn/feature/raider/location_picker/controller/location_picker_controller.dart';
-
-import '../../../../core/network_caller/endpoints.dart';
-import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
 import '../controller/cost_controller.dart';
 import 'cost_calculate.dart';
 
 class CostCalculateLocation extends StatelessWidget {
   CostCalculateLocation({super.key});
-  final LocationPickerController controller = Get.put(
-    LocationPickerController(),
-  );
+  final LocationPickerController controller = Get.put(LocationPickerController());
 
   @override
   Widget build(BuildContext context) {
@@ -162,21 +154,6 @@ class CostCalculateLocation extends StatelessWidget {
                   ),
                   // --- Use Current Location Button for Drop-Off (optional, added for completeness) ---
                   const SizedBox(height: 16),
-                  /*controller.isDropOffLoading.value
-                      ? const Center(child: CircularProgressIndicator(color: Colors.green, strokeWidth: 2))
-                      : ElevatedButton.icon(
-                    onPressed: () async {
-                      await controller.useCurrentDropOffLocation();
-                      FocusScope.of(context).unfocus();
-                    },
-                    icon: const Icon(Icons.my_location, color: Colors.green),
-                    label: const Text('Use Current Location as Drop-off', style: TextStyle(color: Colors.black)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      elevation: 0,
-                      side: const BorderSide(color: Colors.black12, width: 1),
-                    ),
-                  ),*/
                 ],
               )
               // --- Selected Drop-Off Address Display/Clear ---
@@ -240,32 +217,44 @@ class CostCalculateLocation extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                       onPress: () async {
-                        // --- Debug print for pickup and drop-off ---
+                        // Debug print for pickup and drop-off
                         print("📍 Pickup Location: ${controller.selectPickAddress.value}");
                         print("📌 Drop-Off Location: ${controller.selectDropOffAddress.value}");
-                        print("📍 Pickup Location: ${controller.pickLat.value}");
-                        print("📍 Pickup Location: ${controller.pickLong.value}");
-                        print("📌 Drop-Off Location: ${controller.dropOffLat.value}");
-                        print("📌 Drop-Off Location: ${controller.dropOffLong.value}");
+                        print("📍 Pickup Lat: ${controller.pickLat.value}");
+                        print("📍 Pickup Lng: ${controller.pickLong.value}");
+                        print("📌 Drop-Off Lat: ${controller.dropOffLat.value}");
+                        print("📌 Drop-Off Lng: ${controller.dropOffLong.value}");
 
                         if (!Get.isRegistered<FareController>()) {
                           Get.put(FareController());
                         }
                         final fareController = Get.find<FareController>();
 
-                        // ✅ Raw token use (no 'Bearer')
-                        await fareController.fetchFareData("YOUR_RAW_TOKEN_HERE");
+                        // First fetch the fare configuration data
+                        await fareController.fetchFareData("${AuthController.accessToken}");
 
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (_) => CostCalculateSheet(
-                            pickupLat: 23.76224224030482,
-                            pickupLng: 90.43291515130994,
-                            dropLat: 23.79358168022585,
-                            dropLng: 90.40630764080944,
-                          ),
+                        // Then calculate the fare with the selected locations
+                        final calculatedFareData = await fareController.calculateFare(
+                          pickup: controller.selectPickAddress.value,
+                          dropOff: controller.selectDropOffAddress.value,
+                          pickupLat: controller.pickLat.value,
+                          pickupLng: controller.pickLong.value,
+                          dropOffLat: controller.dropOffLat.value,
+                          dropOffLng: controller.dropOffLong.value,
                         );
+
+                        if (calculatedFareData != null) {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (_) => CostCalculateSheet(
+                              pickupLat: controller.pickLat.value,
+                              pickupLng: controller.pickLong.value,
+                              dropLat: controller.dropOffLat.value,
+                              dropLng: controller.dropOffLong.value,
+                            ),
+                          );
+                        }
                       },
 
 
@@ -279,26 +268,4 @@ class CostCalculateLocation extends StatelessWidget {
       ),
     );
   }
-  // Future<void> locationApiCall()async{
-  //   Map<String,dynamic>mapBody={
-  //     "pickup": controller.selectPickAddress.value,
-  //     "dropOff": controller.selectDropOffAddress.value,
-  //     "pickupLat": controller.pickLat.value,
-  //     "pickupLng": controller.pickLong.value,
-  //     "dropOffLat": controller.dropOffLat.value,
-  //     "dropOffLng":  controller.dropOffLong.value,
-  //   };
-  //
-  //   NetworkResponse response=await NetworkCall.postRequest(url: Urls.pickUpLocation,body: mapBody);
-  //
-  //   if(response.isSuccess){
-  //
-  //     await AuthController.accessToken;
-  //     print("location find success");
-  //   }else{
-  //     print("${response.statusCode}");
-  //   }
-  //
-  //
-  // }
 }

@@ -1,38 +1,72 @@
+// ride_response_model.dart
+
 class MyRideModel {
-  final String id;
-  final String userId;
-  final String vehicleId;
-  final String pickupLocation;
-  final String dropOffLocation;
-  final double pickupLat;
-  final double pickupLng;
-  final double dropOffLat;
-  final double dropOffLng;
-  final double driverLat;
-  final double driverLng;
-  final double totalAmount;
-  final String paymentMethod;
-  final String paymentStatus;
-  final bool isPayment;
-  final String pickupDate;
-  final String pickupTime;
-  final String rideTime;
-  final String waitingTime;
-  final String status;
-  final String assignedDriver;
-  final String assignedDriverReqStatus;
-  final bool isDriverReqCancel;
-  final bool arrivalConfirmation;
-  final bool journeyStarted;
-  final bool journeyCompleted;
-  final String specialNotes;
-  final List<String> beforePickupImages;
-  final List<String> afterPickupImages;
-  final UserModel user;
-  final VehicleModel vehicle;
-  final List<NearbyDriverModel> nearbyDrivers;
+  bool success;
+  String message;
+  List<RideData> data;
 
   MyRideModel({
+    required this.success,
+    required this.message,
+    required this.data,
+  });
+
+  factory MyRideModel.fromJson(Map<String, dynamic> json) => MyRideModel(
+    success: json['success'],
+    message: json['message'],
+    data: List<RideData>.from(json['data'].map((x) => RideData.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'success': success,
+    'message': message,
+    'data': List<dynamic>.from(data.map((x) => x.toJson())),
+  };
+}
+
+class RideData {
+  String id;
+  String userId;
+  String vehicleId;
+  String pickupLocation;
+  String dropOffLocation;
+  double pickupLat;
+  double pickupLng;
+  double dropOffLat;
+  double dropOffLng;
+  double driverLat;
+  double driverLng;
+  double totalAmount;
+  double distance;
+  double platformFee;
+  String platformFeeType;
+  String paymentMethod;
+  String paymentStatus;
+  bool isPayment;
+  String pickupDate;
+  String pickupTime;
+  int rideTime;
+  int waitingTime;
+  String status;
+  String assignedDriver;
+  String assignedDriverReqStatus;
+  bool isDriverReqCancel;
+  bool arrivalConfirmation;
+  bool journeyStarted;
+  bool journeyCompleted;
+  String serviceType;
+  String specialNotes;
+  List<String> beforePickupImages;
+  List<String> afterPickupImages;
+  String cancelReason;
+  String createdAt;
+  String updatedAt;
+  String? ridePlanId;
+  User user;
+  Vehicle vehicle;
+  List<NearbyDriver> nearbyDrivers;
+
+  RideData({
     required this.id,
     required this.userId,
     required this.vehicleId,
@@ -45,6 +79,9 @@ class MyRideModel {
     required this.driverLat,
     required this.driverLng,
     required this.totalAmount,
+    required this.distance,
+    required this.platformFee,
+    required this.platformFeeType,
     required this.paymentMethod,
     required this.paymentStatus,
     required this.isPayment,
@@ -59,65 +96,117 @@ class MyRideModel {
     required this.arrivalConfirmation,
     required this.journeyStarted,
     required this.journeyCompleted,
+    required this.serviceType,
     required this.specialNotes,
     required this.beforePickupImages,
     required this.afterPickupImages,
+    required this.cancelReason,
+    required this.createdAt,
+    required this.updatedAt,
+    this.ridePlanId,
     required this.user,
     required this.vehicle,
     required this.nearbyDrivers,
   });
 
-  factory MyRideModel.fromJson(Map<String, dynamic> json) {
-    return MyRideModel(
-      id: json["id"] ?? "",
-      userId: json["userId"] ?? "",
-      vehicleId: json["vehicleId"] ?? "",
-      pickupLocation: json["pickupLocation"] ?? "",
-      dropOffLocation: json["dropOffLocation"] ?? "",
-      pickupLat: (json["pickupLat"] ?? 0).toDouble(),
-      pickupLng: (json["pickupLng"] ?? 0).toDouble(),
-      dropOffLat: (json["dropOffLat"] ?? 0).toDouble(),
-      dropOffLng: (json["dropOffLng"] ?? 0).toDouble(),
-      driverLat: (json["driverLat"] ?? 0).toDouble(),
-      driverLng: (json["driverLng"] ?? 0).toDouble(),
-      totalAmount: (json["totalAmount"] ?? 0).toDouble(),
-      paymentMethod: json["paymentMethod"] ?? "",
-      paymentStatus: json["paymentStatus"] ?? "",
-      isPayment: json["isPayment"] ?? false,
-      pickupDate: json["pickupDate"] ?? "",
-      pickupTime: json["pickupTime"] ?? "",
-      rideTime: json["rideTime"] ?? "",
-      waitingTime: json["waitingTime"] ?? "",
-      status: json["status"] ?? "",
-      assignedDriver: json["assignedDriver"] ?? "",
-      assignedDriverReqStatus: json["assignedDriverReqStatus"] ?? "",
-      isDriverReqCancel: json["isDriverReqCancel"] ?? false,
-      arrivalConfirmation: json["arrivalConfirmation"] ?? false,
-      journeyStarted: json["journeyStarted"] ?? false,
-      journeyCompleted: json["journeyCompleted"] ?? false,
-      specialNotes: json["specialNotes"] ?? "",
-      beforePickupImages: List<String>.from(json["beforePickupImages"] ?? []),
-      afterPickupImages: List<String>.from(json["afterPickupImages"] ?? []),
-      user: UserModel.fromJson(json["user"]),
-      vehicle: VehicleModel.fromJson(json["vehicle"]),
-      nearbyDrivers: (json["nearbyDrivers"] as List<dynamic>)
-          .map((e) => NearbyDriverModel.fromJson(e))
-          .toList(),
-    );
-  }
+  factory RideData.fromJson(Map<String, dynamic> json) => RideData(
+    id: json['id'],
+    userId: json['userId'],
+    vehicleId: json['vehicleId'],
+    pickupLocation: json['pickupLocation'],
+    dropOffLocation: json['dropOffLocation'],
+    pickupLat: (json['pickupLat'] as num).toDouble(),
+    pickupLng: (json['pickupLng'] as num).toDouble(),
+    dropOffLat: (json['dropOffLat'] as num).toDouble(),
+    dropOffLng: (json['dropOffLng'] as num).toDouble(),
+    driverLat: (json['driverLat'] as num).toDouble(),
+    driverLng: (json['driverLng'] as num).toDouble(),
+    totalAmount: (json['totalAmount'] as num).toDouble(),
+    distance: (json['distance'] as num).toDouble(),
+    platformFee: (json['platformFee'] as num).toDouble(),
+    platformFeeType: json['platformFeeType'],
+    paymentMethod: json['paymentMethod'],
+    paymentStatus: json['paymentStatus'],
+    isPayment: json['isPayment'],
+    pickupDate: json['pickupDate'],
+    pickupTime: json['pickupTime'],
+    rideTime: json['rideTime'],
+    waitingTime: json['waitingTime'],
+    status: json['status'],
+    assignedDriver: json['assignedDriver'],
+    assignedDriverReqStatus: json['assignedDriverReqStatus'],
+    isDriverReqCancel: json['isDriverReqCancel'],
+    arrivalConfirmation: json['arrivalConfirmation'],
+    journeyStarted: json['journeyStarted'],
+    journeyCompleted: json['journeyCompleted'],
+    serviceType: json['serviceType'],
+    specialNotes: json['specialNotes'],
+    beforePickupImages: List<String>.from(json['beforePickupImages']),
+    afterPickupImages: List<String>.from(json['afterPickupImages']),
+    cancelReason: json['cancelReason'],
+    createdAt: json['createdAt'],
+    updatedAt: json['updatedAt'],
+    ridePlanId: json['ridePlanId'],
+    user: User.fromJson(json['user']),
+    vehicle: Vehicle.fromJson(json['vehicle']),
+    nearbyDrivers: List<NearbyDriver>.from(
+        json['nearbyDrivers'].map((x) => NearbyDriver.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'userId': userId,
+    'vehicleId': vehicleId,
+    'pickupLocation': pickupLocation,
+    'dropOffLocation': dropOffLocation,
+    'pickupLat': pickupLat,
+    'pickupLng': pickupLng,
+    'dropOffLat': dropOffLat,
+    'dropOffLng': dropOffLng,
+    'driverLat': driverLat,
+    'driverLng': driverLng,
+    'totalAmount': totalAmount,
+    'distance': distance,
+    'platformFee': platformFee,
+    'platformFeeType': platformFeeType,
+    'paymentMethod': paymentMethod,
+    'paymentStatus': paymentStatus,
+    'isPayment': isPayment,
+    'pickupDate': pickupDate,
+    'pickupTime': pickupTime,
+    'rideTime': rideTime,
+    'waitingTime': waitingTime,
+    'status': status,
+    'assignedDriver': assignedDriver,
+    'assignedDriverReqStatus': assignedDriverReqStatus,
+    'isDriverReqCancel': isDriverReqCancel,
+    'arrivalConfirmation': arrivalConfirmation,
+    'journeyStarted': journeyStarted,
+    'journeyCompleted': journeyCompleted,
+    'serviceType': serviceType,
+    'specialNotes': specialNotes,
+    'beforePickupImages': List<dynamic>.from(beforePickupImages),
+    'afterPickupImages': List<dynamic>.from(afterPickupImages),
+    'cancelReason': cancelReason,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+    'ridePlanId': ridePlanId,
+    'user': user.toJson(),
+    'vehicle': vehicle.toJson(),
+    'nearbyDrivers': List<dynamic>.from(nearbyDrivers.map((x) => x.toJson())),
+  };
 }
 
-// UserModel
-class UserModel {
-  final String id;
-  final String fullName;
-  final String email;
-  final String profileImage;
-  final String location;
-  final double lat;
-  final double lng;
+class User {
+  String id;
+  String fullName;
+  String email;
+  String profileImage;
+  String location;
+  double lat;
+  double lng;
 
-  UserModel({
+  User({
     required this.id,
     required this.fullName,
     required this.email,
@@ -127,68 +216,80 @@ class UserModel {
     required this.lng,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json["id"] ?? "",
-      fullName: json["fullName"] ?? "",
-      email: json["email"] ?? "",
-      profileImage: json["profileImage"] ?? "",
-      location: json["location"] ?? "",
-      lat: (json["lat"] ?? 0).toDouble(),
-      lng: (json["lng"] ?? 0).toDouble(),
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json['id'],
+    fullName: json['fullName'],
+    email: json['email'],
+    profileImage: json['profileImage'],
+    location: json['location'],
+    lat: (json['lat'] as num).toDouble(),
+    lng: (json['lng'] as num).toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'fullName': fullName,
+    'email': email,
+    'profileImage': profileImage,
+    'location': location,
+    'lat': lat,
+    'lng': lng,
+  };
 }
 
-// VehicleModel
-class VehicleModel {
-  final String id;
-  final String manufacturer;
-  final String model;
-  final String licensePlateNumber;
-  final String bh;
-  final String refferalCode;
-  final String image;
-  final String color;
-  final DriverModel driver;
+class Vehicle {
+  String id;
+  String manufacturer;
+  String model;
+  String licensePlateNumber;
+  String bh;
+  String image;
+  String color;
+  Driver driver;
 
-  VehicleModel({
+  Vehicle({
     required this.id,
     required this.manufacturer,
     required this.model,
     required this.licensePlateNumber,
     required this.bh,
-    required this.refferalCode,
     required this.image,
     required this.color,
     required this.driver,
   });
 
-  factory VehicleModel.fromJson(Map<String, dynamic> json) {
-    return VehicleModel(
-      id: json["id"] ?? "",
-      manufacturer: json["manufacturer"] ?? "",
-      model: json["model"] ?? "",
-      licensePlateNumber: json["licensePlateNumber"] ?? "",
-      bh: json["bh"] ?? "",
-      refferalCode: json["refferalCode"] ?? "",
-      image: json["image"] ?? "",
-      color: json["color"] ?? "",
-      driver: DriverModel.fromJson(json["driver"]),
-    );
-  }
+  factory Vehicle.fromJson(Map<String, dynamic> json) => Vehicle(
+    id: json['id'],
+    manufacturer: json['manufacturer'],
+    model: json['model'],
+    licensePlateNumber: json['licensePlateNumber'],
+    bh: json['bh'],
+    image: json['image'],
+    color: json['color'],
+    driver: Driver.fromJson(json['driver']),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'manufacturer': manufacturer,
+    'model': model,
+    'licensePlateNumber': licensePlateNumber,
+    'bh': bh,
+    'image': image,
+    'color': color,
+    'driver': driver.toJson(),
+  };
 }
 
-// DriverModel
-class DriverModel {
-  final String id;
-  final String fullName;
-  final String email;
-  final String phoneNumber;
-  final String profileImage;
-  final String location;
+class Driver {
+  String id;
+  String fullName;
+  String email;
+  String phoneNumber;
+  String profileImage;
+  String location;
 
-  DriverModel({
+  Driver({
     required this.id,
     required this.fullName,
     required this.email,
@@ -197,29 +298,35 @@ class DriverModel {
     required this.location,
   });
 
-  factory DriverModel.fromJson(Map<String, dynamic> json) {
-    return DriverModel(
-      id: json["id"] ?? "",
-      fullName: json["fullName"] ?? "",
-      email: json["email"] ?? "",
-      phoneNumber: json["phoneNumber"] ?? "",
-      profileImage: json["profileImage"] ?? "",
-      location: json["location"] ?? "",
-    );
-  }
+  factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+    id: json['id'],
+    fullName: json['fullName'],
+    email: json['email'],
+    phoneNumber: json['phoneNumber'],
+    profileImage: json['profileImage'],
+    location: json['location'],
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'fullName': fullName,
+    'email': email,
+    'phoneNumber': phoneNumber,
+    'profileImage': profileImage,
+    'location': location,
+  };
 }
 
-// NearbyDriverModel
-class NearbyDriverModel {
-  final String id;
-  final String fullName;
-  final String phone;
-  final String profileImage;
-  final double lat;
-  final double lng;
-  final double distance;
+class NearbyDriver {
+  String id;
+  String fullName;
+  String phone;
+  String profileImage;
+  double lat;
+  double lng;
+  double distance;
 
-  NearbyDriverModel({
+  NearbyDriver({
     required this.id,
     required this.fullName,
     required this.phone,
@@ -229,15 +336,23 @@ class NearbyDriverModel {
     required this.distance,
   });
 
-  factory NearbyDriverModel.fromJson(Map<String, dynamic> json) {
-    return NearbyDriverModel(
-      id: json["id"] ?? "",
-      fullName: json["fullName"] ?? "",
-      phone: json["phone"] ?? "",
-      profileImage: json["profileImage"] ?? "",
-      lat: (json["lat"] ?? 0).toDouble(),
-      lng: (json["lng"] ?? 0).toDouble(),
-      distance: (json["distance"] ?? 0).toDouble(),
-    );
-  }
+  factory NearbyDriver.fromJson(Map<String, dynamic> json) => NearbyDriver(
+    id: json['id'],
+    fullName: json['fullName'],
+    phone: json['phone'],
+    profileImage: json['profileImage'],
+    lat: (json['lat'] as num).toDouble(),
+    lng: (json['lng'] as num).toDouble(),
+    distance: (json['distance'] as num).toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'fullName': fullName,
+    'phone': phone,
+    'profileImage': profileImage,
+    'lat': lat,
+    'lng': lng,
+    'distance': distance,
+  };
 }
