@@ -13,6 +13,10 @@ class Urls {
   static const String paymentsCreateCard = '$_baseUrl/payments/create-card';
   static const String paymentsSavedCards = '$_baseUrl/payments/saved-cards';
   static const String paymentsCardPayment = '$_baseUrl/payments/card-payment';
+  static const String reviewsCreate = '$_baseUrl/reviews/create';
+  static  String carTransportsSingle(String id) => '$_baseUrl/carTransports/single/$id';
+  static  String riderRideCancel(String id) => '$_baseUrl/carTransports/$id/cancel';
+  static  String carTransportsCompleted(String id) => '$_baseUrl/carTransports/$id/completed';
 
   static String getCalendar(String date, String locationUuid) =>
       '$_baseUrl/calendar?date=$date&pickup_location_uuid=$locationUuid';

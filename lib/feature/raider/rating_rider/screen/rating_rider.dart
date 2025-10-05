@@ -4,10 +4,19 @@ import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/rating_rider/controller/rating_rider_controller.dart';
 
+import '../../choose_taxi/controler/choose_taxi_api_controller.dart';
+import '../controller/rating_rider_api_controller.dart';
+
 class RatingScreen extends StatelessWidget {
   final RatingController controller = Get.put(
     RatingController(),
   ); // Initialize the controller
+
+  final ChooseTaxiApiController apiController = Get.find<ChooseTaxiApiController>();
+  final RatingRiderApiController riderApiMethod = Get.find<RatingRiderApiController>();
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,14 +100,40 @@ class RatingScreen extends StatelessWidget {
                 title: "Submit",
                 backgroundColor: Color(0xFFFFDC71),
                 borderColor: Colors.transparent,
-                onPress: () {
-                  Get.to(() => RatingScreen());
-                },
+                onPress: _submitRating,
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void>_submitRating() async {
+    String transportId = '';
+
+    // 1. Try to get ID from the primary controller (ChooseTaxiApiController)
+    if (apiController.rideDataList.isNotEmpty &&
+        apiController.rideDataList[0].carTransport != null &&
+        apiController.rideDataList[0].carTransport!.isNotEmpty) {
+      transportId = apiController.rideDataList[0].carTransport![0].id ?? '';
+    }
+
+    // 2. Fallback: Try to get ID from Get.arguments
+    if (transportId.isEmpty) {
+      final args = Get.arguments as Map<String, dynamic>? ?? {};
+      transportId = args['transportId']?.toString() ?? '';
+    }
+
+    if (transportId.isNotEmpty) {
+      debugPrint("ExpandedBottomSheet6 initState: Calling API with ID: $transportId");
+      bool isSuccess=await riderApiMethod.ratingRiderApiMethod(transportId, controller.rating.value, controller.details.value);
+      if(isSuccess){
+        Get.to(() => RatingScreen());
+      }
+    } else {
+      debugPrint("⚠️ ExpandedBottomSheet6: No transport ID found - skipping API call in initState");
+    }
+
   }
 }

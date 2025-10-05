@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
-import '../../../../core/const/app_colors.dart';
 import '../../../../core/network_caller/endpoints.dart';
 import '../../choose_taxi/controler/choose_taxi_api_controller.dart';
 import '../../choose_taxi/model/choose_taxi_model.dart';

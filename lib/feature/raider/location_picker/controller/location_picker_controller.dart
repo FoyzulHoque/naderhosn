@@ -307,12 +307,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-
 import '../../../../core/network_caller/endpoints.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter_google_maps_webservices/places.dart' as places;
 
 
