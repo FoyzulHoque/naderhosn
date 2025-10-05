@@ -163,7 +163,7 @@ class HomeScreen extends StatelessWidget {
           }),
 
           // Custom Title Text
-           Padding(
+          Padding(
             padding: EdgeInsets.only(left: 20, top: 60),
             child: Text(
               "Brothers Taxi",
