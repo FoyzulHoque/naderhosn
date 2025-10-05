@@ -1,81 +1,98 @@
+import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import '../../../../core/network_caller/network_config.dart';
-import '../../../../core/network_path/natwork_path.dart';
-import '../../../../core/services_class/shared_preferences_helper.dart';
+import 'package:http/http.dart' as http;
+import 'package:naderhosn/core/services_class/shared_preferences_helper.dart';
+import '../../../../core/network_caller/endpoints.dart';
+import '../../../../core/services_class/data_helper.dart';
 import '../model/my_ride_model.dart';
+import '../model/ride_history_model.dart';
 
-class MyRidesController extends GetxController {
+class RideControllers extends GetxController {
+  // Observable variables
+  var rides = <RideData>[].obs;
+  var rideHistory = <Ride>[].obs;
+
   var isLoading = false.obs;
-  var errorMessage = "".obs;
-  var myRides = <MyRideModel>[].obs;
-  var currentTabIndex = 0.obs; // Added missing variable
+  var errorMessage = ''.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // You can listen to tab changes if needed
-    ever(currentTabIndex, (index) {
-      print("Current tab changed to: $index");
-    });
+  var currentTabIndex = 0.obs;
 
-    // Fetch rides initially
-    fetchMyRides();
-  }
-
-  /// Fetch My Rides
-  Future<void> fetchMyRides() async {
-    isLoading.value = true;
-    errorMessage.value = "";
-    EasyLoading.show(status: "Fetching rides...");
-
+  /// Fetch rides from API
+  Future<void> fetchRides() async {
     try {
-      // Token
-      final token = await SharedPreferencesHelper.getAccessToken();
-      if (token == null || token.isEmpty) {
-        errorMessage.value = "Access token not found. Please login.";
-        EasyLoading.showError(errorMessage.value);
+      isLoading.value = true;
+      errorMessage.value = '';
+
+      final token = AuthController.accessToken;
+
+      if (token == null) {
+        errorMessage.value = "No access token found. Please log in again.";
         return;
       }
 
-      // Headers
-      Map<String, String> headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
+      var url = Uri.parse(
+          '${Urls.baseURL}/carTransports/my-rides');
 
-      // Call API
-      NetworkResponse response = await NetworkCall.getRequest(
-        url: NetworkPath.myRides, // /carTransports/my-rides
-        headers: headers,
-      );
+      var headers = {'Authorization': token};
 
-      if (response.isSuccess) {
-        final data = response.responseData?["data"];
-        if (data != null && data is List) {
-          myRides.value = data
-              .map((e) => MyRideModel.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
-        } else {
-          myRides.clear();
-        }
-        EasyLoading.showSuccess("Rides fetched successfully");
+      var response = await http.get(url, headers: headers);
+
+      print(response.request?.url);
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        var jsonData = json.decode(response.body);
+        MyRideModel myRideModel = MyRideModel.fromJson(jsonData);
+        rides.value = myRideModel.data;
       } else {
         errorMessage.value =
-            response.errorMessage ?? "Failed to load rides";
-        EasyLoading.showError(errorMessage.value);
+        'Failed to fetch rides: ${response.statusCode} ${response.reasonPhrase}';
       }
     } catch (e) {
-      errorMessage.value = "Error: $e";
-      EasyLoading.showError(errorMessage.value);
+      errorMessage.value = 'Something went wrong: $e';
     } finally {
       isLoading.value = false;
-      EasyLoading.dismiss();
     }
   }
 
-  /// Change tab index
-  void changeTab(int index) {
-    currentTabIndex.value = index;
+
+  Future<void> fetchRideHistory() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    try {
+
+      final token = AuthController.accessToken;
+
+      if (token == null) {
+        errorMessage.value = "No access token found. Please log in again.";
+        return;
+      }
+
+      final url = Uri.parse('${Urls.baseURL}/carTransports/my-rides-history');
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonData = json.decode(response.body);
+        if (jsonData['success'] == true) {
+          RideHistoryModel rideHistoryModel = RideHistoryModel.fromJson(jsonData);
+          rideHistory.value = rideHistoryModel.data;
+        } else {
+          errorMessage.value = jsonData['message'] ?? 'Something went wrong';
+        }
+      } else {
+        errorMessage.value = 'Server Error: ${response.statusCode}';
+      }
+    } catch (e) {
+      errorMessage.value = 'Error: $e';
+    } finally {
+      isLoading.value = false;
+    }
   }
+
 }

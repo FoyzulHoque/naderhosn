@@ -26,6 +26,12 @@ class CostCalculateController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    searchPickController.addListener(() {
+      // শুধু তখনই update হবে যদি user টাইপ করে
+      if (searchPickController.text != selectPickAddress.value) {
+        selectPickAddress.value = searchPickController.text;
+      }
+    });
   }
 
   @override
@@ -36,12 +42,8 @@ class CostCalculateController extends GetxController {
   void searchPickPlaces(String input) async {
     if (input.isEmpty) {
       pickPredictions.clear();
-      selectPickAddress.value = '';
-      pickLat.value = 0.0;
-      pickLong.value = 0.0;
       return;
     }
-
     final url =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=geocode';
 
@@ -70,12 +72,9 @@ class CostCalculateController extends GetxController {
       if (data['status'] == 'OK') {
         final result = data['result'];
         selectPickAddress.value = result['formatted_address'];
-        pickLat.value = result['geometry']['add location']['lat'];
-        pickLong.value = result['geometry']['add location']['lng'];
-
-        // Set the text of the search box to the selected address
+        pickLat.value = result['geometry']['location']['lat'];
+        pickLong.value = result['geometry']['location']['lng'];
         searchPickController.text = selectPickAddress.value;
-
         pickPredictions.clear();
       }
     }
@@ -92,30 +91,26 @@ class CostCalculateController extends GetxController {
   Future<void> useCurrentPickLocation() async {
     try {
       isPickLoading.value = true;
-
-      final position = await getCurrentPickLocation();
+      Position? position = await getCurrentPickLocation();
       if (position == null) {
-        Get.snackbar('Error', 'Could not get current add location');
+        Get.snackbar('Error', 'Could not get current location');
         return;
       }
-
-      final lat = position.latitude;
-      final lng = position.longitude;
+      double lat = position.latitude;
+      double lng = position.longitude;
 
       final url =
           'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat,$lng&key=$apiKey';
-
       final response = await http.get(Uri.parse(url));
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'OK' && data['results'].isNotEmpty) {
           final address = data['results'][0]['formatted_address'];
-
           selectPickAddress.value = address;
           pickLat.value = lat;
           pickLong.value = lng;
-          searchPickController.text = address;
-          pickPredictions.clear();
+          searchPickController.text = address; // TextField-এ set
         } else {
           Get.snackbar('Error', 'Failed to get address from coordinates');
         }
@@ -191,8 +186,8 @@ class CostCalculateController extends GetxController {
       if (data['status'] == 'OK') {
         final result = data['result'];
         selectDestAddress.value = result['formatted_address'];
-        destLat.value = result['geometry']['add location']['lat'];
-        destLong.value = result['geometry']['add location']['lng'];
+        destLat.value = result['geometry']['location']['lat'];
+        destLong.value = result['geometry']['location']['lng'];
 
         // Set the text of the search box to the selected address
         searchDestController.text = selectDestAddress.value;
@@ -216,7 +211,7 @@ class CostCalculateController extends GetxController {
 
       final position = await getCurrentDestLocation();
       if (position == null) {
-        Get.snackbar('Error', 'Could not get current add location');
+        Get.snackbar('Error', 'Could not get current location');
         return;
       }
 

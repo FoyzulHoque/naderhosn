@@ -6,8 +6,6 @@ import 'package:naderhosn/core/services_class/data_helper.dart';
 import 'package:naderhosn/feature/auth/login/model/rider_model.dart';
 import 'package:naderhosn/feature/auth/user%20text%20editing%20controller/user_text_editing_controller.dart';
 
-import '../../../../core/services_class/shared_preferences_helper.dart';
-
 class RegisterOtpControllers extends GetxController {
   final TextEditingController otpController = TextEditingController();
   var otpError = false.obs;
@@ -44,27 +42,14 @@ class RegisterOtpControllers extends GetxController {
       debugPrint("📥 API Response Data: ${response.responseData}");
 
       if (response.isSuccess) {
-        // Extract token
-        String token = response.responseData!['data']["token"];
 
-        // Parse RiderModel
-        RiderModel riderModel = RiderModel.fromJson(response.responseData!["data"]);
-
-        // Save token in SharedPreferences
-        await SharedPreferencesHelper.saveToken(token);
-        print("----------------------------------------✅ Token saved: $token");
-
-        // Optionally save rider data in AuthController (or anywhere you want)
-        await AuthController.setUserData(token, riderModel);
-
-        isSuccess = true;
-        _errorMessage = null;
+        String token=response.responseData!['data']["token"];
+        RiderModel riderModel=RiderModel.fromJson(response.responseData!["data"]);
+        await AuthController.setUserData(token,riderModel);
+        isSuccess=true;
+        _errorMessage=null;
         update();
-      } else {
-        _errorMessage = response.errorMessage;
-        print("❌ Login failed: $_errorMessage");
       }
-
     } catch (e) {
       _errorMessage = "Exception: $e";
       debugPrint("❌ OTP Verify Exception: $e");

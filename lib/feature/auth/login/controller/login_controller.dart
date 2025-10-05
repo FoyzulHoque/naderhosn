@@ -14,7 +14,6 @@ class LoginApiRiderController extends GetxController {
   UserTextEditingController userTextEditingController =
   Get.put(UserTextEditingController());
 
-  //final DataHelperController dataHelperController =Get.put(DataHelperController());
 
   Future<bool> loginApiRiderMethod() async {
     bool isSuccess = false;
@@ -32,7 +31,7 @@ class LoginApiRiderController extends GetxController {
       if (response.isSuccess) {
         print("---------------------$mapBody");
         var riderModel = RiderModel.fromJson(response.responseData!["data"]);
-        print("---------------------$riderModel");
+        print("---------------hhh------$riderModel");
 
         _errorMessage = null;
         isSuccess = true;

@@ -1,90 +1,136 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import '../../../../core/network_path/natwork_path.dart';
-import '../../../../core/services_class/shared_preferences_helper.dart';
-import '../model/profile_edit_model.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:naderhosn/core/network_caller/endpoints.dart';
+import '../../../../core/services_class/data_helper.dart';
+import '../model/user_data_model.dart';
 
-class ProfileEditController extends GetxController {
+class UpdateProfileController extends GetxController {
   var isLoading = false.obs;
-  var errorMessage = "".obs;
+  final formKey = GlobalKey<FormState>();
 
-  Future<void> updateProfile({
-    required String fullName,
-    required String phoneNumber,
-    String? imagePath,
-  }) async {
-    isLoading.value = true;
-    errorMessage.value = "";
-    EasyLoading.show(status: "Updating profile...");
+  var userData = Rxn<UserDataModel>(); // ✅ Store user profile here
 
+  var selectedImage = Rxn<File>();
+
+  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
+  var errorMessage = ''.obs;
+
+  Future<void> pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      selectedImage.value = File(pickedFile.path);
+    }
+  }
+
+  Future<void> updateUserProfile() async {
     try {
-      final token = await SharedPreferencesHelper.getAccessToken();
-      if (token == null || token.isEmpty) {
-        errorMessage.value = "Access token not found. Please login.";
-        EasyLoading.showError(errorMessage.value);
-        return;
-      }
+      EasyLoading.show(status: "Loading...");
 
-      // Multipart request
-      var request = http.MultipartRequest(
-        "PATCH",
-        Uri.parse(NetworkPath.updateProfile),
-      );
+      final url = Uri.parse("${Urls.baseURL}/users/update-profile");
+      final token =  AuthController.accessToken;
 
-      // Headers
-      request.headers["Authorization"] = token;
 
-      // Add JSON as string inside `data`
-      Map<String, dynamic> data = {
-        "fullName": fullName,
-        "phoneNumber": phoneNumber,
+      print("=============$token");
+      Map<String, String> headers = {
+        'Authorization': "$token",
       };
-      request.fields["data"] = jsonEncode(data);
 
-      // Add file if exists
-      if (imagePath != null && imagePath.isNotEmpty) {
+      var request = http.MultipartRequest('PATCH', url);
+      request.fields.addAll({
+        'data': jsonEncode({
+          "fullName": fullNameController.text,
+          "email": emailController.text,
+        })
+      });
+
+      if (selectedImage.value != null) {
         request.files.add(
-          await http.MultipartFile.fromPath("image", imagePath),
+          await http.MultipartFile.fromPath('image', selectedImage.value!.path),
         );
       }
 
-      // 🔹 Debug print request details
-      print("📤 PATCH API CALL: /users/update-profile");
-      print("➡️ Headers: ${request.headers}");
-      print("➡️ Fields: ${request.fields}");
-      print("➡️ File attached: ${imagePath ?? 'No file'}");
+      request.headers.addAll(headers);
 
-      // Send request
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
+      http.StreamedResponse response = await request.send();
+      var responseBody = await response.stream.bytesToString();
 
-      // 🔹 Debug print response
-      print("📥 Status Code: ${response.statusCode}");
-      print("📥 Response Body: ${response.body}");
+      print("Response: $responseBody");
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final profile = UpdateProfileResponse.fromJson(jsonResponse);
+        final jsonRes = jsonDecode(responseBody);
 
-        EasyLoading.showSuccess("Profile updated");
-        print("✅ Updated Name: ${profile.data.fullName}");
-        print("✅ Updated Phone: ${profile.data.phoneNumber}");
-        print("✅ Updated Image: ${profile.data.profileImage}");
+        if (jsonRes["success"] == true && jsonRes["data"] != null) {
+          final updatedProfile = UserDataModel.fromJson(jsonRes["data"]);
+
+          // ✅ Update observable
+          userData.value = updatedProfile;
+
+          // ✅ Update controllers
+          fullNameController.text = updatedProfile.fullName;
+          emailController.text = updatedProfile.email ?? '';
+        }
+
+        EasyLoading.showSuccess("Profile updated successfully");
       } else {
-        errorMessage.value = "Failed to update profile";
-        EasyLoading.showError(errorMessage.value);
+        EasyLoading.showError("Failed: ${response.reasonPhrase}");
       }
     } catch (e) {
-      errorMessage.value = "Error: $e";
-      EasyLoading.showError(errorMessage.value);
-      print("❌ Exception: $e");
+      Get.snackbar("Error", "Something went wrong: $e");
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
+    }
+  }
+
+  Future<UserDataModel?> fetchMyProfile() async {
+    EasyLoading.show(status: 'Fetching profile...');
+    try {
+      final token = AuthController.accessToken;
+      if (token == null) return null;
+
+      final response = await http.get(
+        Uri.parse("${Urls.baseURL}/users/get-me"),
+        headers: {"Authorization": token},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonRes = jsonDecode(response.body);
+        if (jsonRes["success"] == true) {
+          final model = UserDataModel.fromJson(jsonRes["data"]);
+
+          userData.value = model;
+
+          // ✅ populate controllers
+          fullNameController.text = model.fullName;
+          emailController.text = model.email ?? '';
+
+          return model;
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint("Fetch profile error: $e");
+      return null;
+    } finally {
       EasyLoading.dismiss();
     }
   }
 
+  @override
+  void onClose() {
+    fullNameController.dispose();
+    emailController.dispose();
+    super.onClose();
+  }
 }
+

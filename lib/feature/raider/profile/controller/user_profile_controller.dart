@@ -1,3 +1,4 @@
+/*
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart'; // for debugPrint
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -39,7 +40,7 @@ class UserProfileController extends GetxController {
 
       // Call API
       NetworkResponse response = await NetworkCall.getRequest(
-        url: NetworkPath.getMe, // /users/get-me
+        url: NetworkPath.getMe,
         headers: headers,
       );
 
@@ -76,3 +77,4 @@ class UserProfileController extends GetxController {
     }
   }
 }
+*/

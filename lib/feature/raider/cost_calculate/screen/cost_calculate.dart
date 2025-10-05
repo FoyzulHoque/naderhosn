@@ -6,7 +6,7 @@ import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/cost_calculate/controller/cost_calculate_controller.dart';
 import 'package:naderhosn/feature/raider/cost_calculate/screen/cost_calculate_location.dart';
 
-import '../controller/fares_controller.dart';
+import '../controller/cost_controller.dart';
 
 class CostCalculate extends StatelessWidget {
   CostCalculate({super.key});
@@ -46,7 +46,7 @@ class CostCalculate extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Enter pickup add location",
+                                "Enter pick up and drop up location",
                                 style: globalTextStyle(
                                   fontWeight: FontWeight.w400,
                                   color: Color(0xFF777F8B),
@@ -63,55 +63,10 @@ class CostCalculate extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.share_location,
-                            color: Colors.black,
-                          ), // Location icon
-                          SizedBox(width: 10), // Space between icon and text
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Enter destination add location',
-                                style: globalTextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF777F8B),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Text(
-                                controller.selectDestAddress.value,
-                                style: TextStyle(fontSize: 16),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+
                     ],
                   ),
                 ),
-              ),
-              SizedBox(height: 30),
-              CustomButton(
-                title: "See Prices",
-                borderColor: Colors.transparent,
-                textStyle: globalTextStyle(
-                  color: Colors.black,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-                backgroundColor: Color(0xFFFFDC71),
-                onPress: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => CostCalculateSheet(),
-                  );
-                },
               ),
             ],
           ),
@@ -121,15 +76,45 @@ class CostCalculate extends StatelessWidget {
   }
 }
 
-class CostCalculateSheet extends StatelessWidget {
-  CostCalculateSheet({super.key});
 
-  final FaresController fareController = Get.put(FaresController());
+
+class CostCalculateSheet extends StatelessWidget {
+  final double pickupLat;
+  final double pickupLng;
+  final double dropLat;
+  final double dropLng;
+
+  const CostCalculateSheet({
+    super.key,
+    required this.pickupLat,
+    required this.pickupLng,
+    required this.dropLat,
+    required this.dropLng,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // API call to get current fare
-    fareController.getCurrentFare();
+    final fareController = Get.find<FareController>();
+
+    // Use calculated fare from backend if available, otherwise fallback to client calculation
+    double totalFare = 0.0;
+    double distanceKm = 0.0;
+    
+    if (fareController.calculatedFare.value != null) {
+      // Use backend calculated fare
+      totalFare = fareController.calculatedFare.value!.totalFare ?? 0.0;
+      distanceKm = fareController.calculatedFare.value!.distance ?? 0.0;
+      print("🎯 Using backend calculated fare: $totalFare, distance: $distanceKm");
+    } else {
+      // Fallback to client-side calculation
+      distanceKm = fareController.calculateDistance(
+        pickupLat,
+        pickupLng,
+        dropLat,
+        dropLng,
+      );
+      totalFare = fareController.calculateTotalFare(distanceKm);
+    }
 
     return DraggableScrollableSheet(
       initialChildSize: 0.4,
@@ -141,16 +126,18 @@ class CostCalculateSheet extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (fareController.errorMessage.isNotEmpty) {
-            return Center(child: Text(fareController.errorMessage.value));
+          final fare = fareController.fare.value;
+          final calculatedFare = fareController.calculatedFare.value;
+          
+          print("🔍 Debug - fare: ${fare?.totalFare}");
+          print("🔍 Debug - calculatedFare: ${calculatedFare?.totalFare}");
+          print("🔍 Debug - calculatedFare distance: ${calculatedFare?.distance}");
+          
+          if (fare == null) {
+            return const Center(child: Text("No fare data available"));
           }
 
-          if (fareController.currentFare.value == null) {
-            return const Center(child: Text("No fare data found"));
-          }
-
-          final fare = fareController.currentFare.value!;
-
+          // তোমার আগের UI design 그대로 থাকবে 👇
           return Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -188,6 +175,7 @@ class CostCalculateSheet extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   const Divider(),
                   Text(
                     "Your fare will be the price presented before the trip or based on the rates below and other applicable surcharges and adjustments",
@@ -196,6 +184,7 @@ class CostCalculateSheet extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+
                   Align(
                     alignment: Alignment.center,
                     child: Image.asset(
@@ -204,77 +193,84 @@ class CostCalculateSheet extends StatelessWidget {
                     ),
                   ),
 
-                  // Base Fare
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Base Fare",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.baseFare}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  // Minimum Fare
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Minimum Fare",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.minimumFare}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  // Cost per Minute
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "+ Per Minute",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.costPerMin}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-
-                  // Cost per Kilometer
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "+ Per Kilometer",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "৳${fare.costPerKm}",
-                        style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+                  // Show backend calculated fare if available, otherwise show base fare rates
+                  if (calculatedFare != null) ...[
+                    // Backend calculated fare breakdown
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Distance", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("${calculatedFare.distance?.toStringAsFixed(2) ?? '0.00'} km", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Duration", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("${calculatedFare.duration ?? 0} min", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Base Fare", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("\$${calculatedFare.baseFare?.toStringAsFixed(2) ?? '0.00'}", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ] else ...[
+                    // Base fare rates
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Base Fare", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("\$${fare.baseFare.toStringAsFixed(2)}", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Minimum Fare", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("\$${fare.minimumFare.toStringAsFixed(2)}", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("+ Per Minute", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("\$${fare.costPerMin.toStringAsFixed(2)}", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("+ Per Kilometer", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text("\$${fare.costPerKm.toStringAsFixed(2)}", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
 
                   const SizedBox(height: 10),
                   const Divider(),
                   const SizedBox(height: 10),
 
-                  // Waiting per Minute
                   Text(
-                    "Additional wait time charges may apply: ৳${fare.waitingPerMin} per minute.",
-                    style: globalTextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    "Additional wait time charges may apply: BDT ${calculatedFare?.waitingPerMin?.toStringAsFixed(2) ?? fare.waitingPerMin.toStringAsFixed(2)} per minute.",
+                    style: globalTextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  const SizedBox(height: 20),
 
+                  // 👉 এখানে শুধু Extra Estimated Fare দেখাচ্ছি (design change না করে)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Estimated Fare", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
+                      Text("\$${totalFare.toStringAsFixed(2)}", style: globalTextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
                   CustomButton(
                     title: "Close",
                     borderColor: Colors.transparent,
@@ -292,3 +288,4 @@ class CostCalculateSheet extends StatelessWidget {
     );
   }
 }
+
