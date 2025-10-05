@@ -106,7 +106,7 @@ class RidePlan {
 
 class NearbyDriver {
   final String id;
-  final String? fullName; // Can be "null" in the JSON, so it's nullable
+  final String? fullName;
   final double lat;
   final double lng;
   final String vehicleId;
@@ -124,18 +124,15 @@ class NearbyDriver {
   });
 
   factory NearbyDriver.fromJson(Map<String, dynamic> json) {
-    // Handle "null" string value for fullName
     final String? name = json['fullName'] as String?;
-
     return NearbyDriver(
       id: json['id'] as String,
-      // If the string is "null" or empty, treat it as null/empty string
       fullName: (name == null || name == 'null') ? null : name,
-      lat: json['lat'] as double,
-      lng: json['lng'] as double,
+      lat: (json['lat'] as num).toDouble(),
+      lng: (json['lng'] as num).toDouble(),
       vehicleId: json['vehicleId'] as String,
       vehicleName: json['vehicleName'] as String,
-      distance: json['distance'] as double,
+      distance: (json['distance'] as num).toDouble(),
     );
   }
 

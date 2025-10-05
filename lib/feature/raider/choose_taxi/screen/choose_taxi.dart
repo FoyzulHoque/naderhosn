@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:get/Get.dart';
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/choose_taxi/controler/choose_taxi_controller.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/screen/confirm_pickup.dart';
 import '../controler/choose_taxi_api_controller.dart';
-import '../model/location_searching_model.dart';
+import '../model/choose_taxi_model.dart';
+import '../widget/widget_add_new_card.dart';
 
 class ChooseTaxiScreen extends StatelessWidget {
   final ChooseTaxiController controller = Get.put(ChooseTaxiController());
@@ -32,8 +33,6 @@ class ChooseTaxiScreen extends StatelessWidget {
       if (pLat != 0.0 || pLng != 0.0 || dLat != 0.0 || dLng != 0.0) {
         print("ChooseTaxiScreen: Calling loadAndDisplayRideData with arguments from previous screen.");
         controller.loadAndDisplayRideData(
-          initialPickup: pickupAddress,
-          initialDropOff: dropOffAddress,
           initialPickupLat: pLat,
           initialPickupLng: pLng,
           initialDropOffLat: dLat,
@@ -46,16 +45,19 @@ class ChooseTaxiScreen extends StatelessWidget {
       body: Stack(
         children: [
           Obx(() {
-            print("Rendering GoogleMap with ${controller.markers.length} markers");
-            if (controller.isLoadingMap.value || (controller.isLoadingDirections.value && controller.markers.isEmpty)) {
+            if (controller.isLoadingMap.value || controller.isLoadingDirections.value && controller.markers.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (controller.apiController.errorMessage.value.isNotEmpty && controller.markers.isEmpty) {
-              return Center(child: Text("Error: ${controller.apiController.errorMessage.value}"));
+            if (controller.apiController.errorMessage.value.isNotEmpty &&
+                controller.markers.isEmpty) {
+              return Center(
+                  child: Text(
+                      "Error: ${controller.apiController.errorMessage.value}"));
             }
 
-            if (controller.pickupPosition.value == null && controller.markers.isEmpty) {
+            if (controller.pickupPosition.value == null &&
+                controller.markers.isEmpty) {
               if (pLat != 0.0 || pLng != 0.0) {
                 print("ChooseTaxiScreen: Displaying fallback map with arguments.");
                 return GoogleMap(
@@ -63,23 +65,23 @@ class ChooseTaxiScreen extends StatelessWidget {
                     target: LatLng(pLat, pLng),
                     zoom: 15,
                   ),
-                  onMapCreated: controller.onMapCreated,
                 );
               }
-              return const Center(child: Text("Map data could not be loaded or no ride found."));
+              return const Center(
+                  child: Text("Map data could not be loaded or no ride found."));
             }
 
             return GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: controller.pickupPosition.value ??
-                    LatLng(pLat != 0.0 ? pLat : 23.749341, pLng != 0.0 ? pLng : 90.437213),
+                    LatLng(pLat != 0.0 ? pLat : 23.7947536,
+                        pLng != 0.0 ? pLng : 90.4143085),
                 zoom: 15,
               ),
-              markers: controller.markers,
+              markers: controller.markers.value,
               polylines: controller.polyline.value.points.isNotEmpty
                   ? {controller.polyline.value}
                   : <Polyline>{},
-              onMapCreated: controller.onMapCreated,
             );
           }),
           Padding(
@@ -100,10 +102,6 @@ class ChooseTaxiScreen extends StatelessWidget {
   }
 }
 
-// choose_taxi.dart (UI file)
-
-// ... (imports and ChooseTaxiScreen class remain the same) ...
-
 class ExpandedBottomSheet extends StatelessWidget {
   final ChooseTaxiApiController apiController = Get.find<ChooseTaxiApiController>();
   final ChooseTaxiController mainMapController = Get.find<ChooseTaxiController>();
@@ -113,86 +111,73 @@ class ExpandedBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // 1. Loading State for API data
       if (apiController.isLoading.value && apiController.rideDataList.isEmpty) {
         return Positioned(
-          bottom: 0, left: 0, right: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.3,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1)],
-            ),
+            height: 100,
+            color: Colors.white.withOpacity(0.8),
             child: const Center(child: CircularProgressIndicator()),
           ),
         );
       }
 
-      // 2. Error State for API data
       if (apiController.errorMessage.value.isNotEmpty && apiController.rideDataList.isEmpty) {
         return Container(
           alignment: Alignment.bottomCenter,
-          child: Container(
-            padding: const EdgeInsets.all(20.0),
-            height: MediaQuery.of(context).size.height * 0.3,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1)],
-            ),
-            child: Center(
-              child: Text(
-                "Error fetching ride options:\n${apiController.errorMessage.value}",
-                style: globalTextStyle(color: Colors.red, fontSize: 16),
-                textAlign: TextAlign.center,
-              ),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text("Error fetching ride options: ${apiController.errorMessage.value}", style: globalTextStyle(color: Colors.red)),
           ),
         );
       }
 
-      // 3. No Ride Plans available from API
       if (apiController.rideDataList.isEmpty) {
         return Container(
           alignment: Alignment.bottomCenter,
-          child: Container(
-            padding: const EdgeInsets.all(20.0),
-            height: MediaQuery.of(context).size.height * 0.3,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1)],
-            ),
-            child: Center(
-              child: Text(
-                "No ride options available at the moment.",
-                style: globalTextStyle(fontSize: 16, color: Colors.grey.shade700),
-                textAlign: TextAlign.center,
-              ),
-            ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text("No ride options available at the moment.", style: globalTextStyle()),
           ),
         );
       }
 
-      // --- Data is available ---
-      final ridePlanFromApi = apiController.rideDataList.first; // Assuming we always work with the first ride plan
-
-      // Get the list of available drivers for the bottom sheet
-      final List<NearbyDriver> driversToShow = ridePlanFromApi.availableDrivers ?? [];
+      final ridePlanFromApi = apiController.rideDataList.first;
+      final selectedCarFromApi = ridePlanFromApi.carTransport != null && ridePlanFromApi.carTransport!.isNotEmpty
+          ? ridePlanFromApi.carTransport!.first
+          : (mainMapController.selectedDriver.value != null
+          ? CarTransport(
+        id: mainMapController.selectedDriver.value!.id,
+        serviceType: mainMapController.selectedDriver.value!.vehicleName,
+        totalAmount: ridePlanFromApi.estimatedFare,
+        driverLat: mainMapController.selectedDriver.value!.lat,
+        driverLng: mainMapController.selectedDriver.value!.lng,
+        vehicleId: mainMapController.selectedDriver.value!.vehicleId,
+        pickupLocation: ridePlanFromApi.pickup,
+        dropOffLocation: ridePlanFromApi.dropOff,
+        pickupLat: ridePlanFromApi.pickupLat,
+        pickupLng: ridePlanFromApi.pickupLng,
+        dropOffLat: ridePlanFromApi.dropOffLat,
+        dropOffLng: ridePlanFromApi.dropOffLng,
+        distance: mainMapController.selectedDriver.value!.distance,
+      )
+          : null);
 
       return DraggableScrollableSheet(
         initialChildSize: 0.30,
         minChildSize: 0.15,
         maxChildSize: 0.7,
-        builder: (BuildContext sheetContext, ScrollController scrollController) {
+        builder: (BuildContext context, ScrollController scrollController) {
           return Container(
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1)],
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black26, blurRadius: 10, spreadRadius: 1),
+              ],
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: SingleChildScrollView(
@@ -203,116 +188,198 @@ class ExpandedBottomSheet extends StatelessWidget {
                   Align(
                     alignment: Alignment.center,
                     child: Container(
-                      width: 50, height: 5,
+                      width: 50,
+                      height: 5,
                       margin: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(5)),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(5),
+                      ),
                     ),
                   ),
                   Align(
                     alignment: Alignment.center,
                     child: Text(
-                      "Available Taxis", // Or "Choose Your Ride"
-                      style: globalTextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                      "Confirm Details",
+                      style: globalTextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 5),
                   const Divider(),
                   const SizedBox(height: 10),
 
-                  // --- MODIFIED SECTION TO DISPLAY LIST OF AVAILABLE DRIVERS ---
-                  if (driversToShow.isNotEmpty)
-                    ...driversToShow.map((driver) { // 'driver' is a NearbyDriverModel object
-                      // You might need to fetch fare for each driver separately if not in NearbyDriverModel
-                      // For now, using the ridePlanFromApi.estimatedFare as a general fare
-                      final String fareDisplay = ridePlanFromApi.estimatedFare != null
-                          ? "\$${ridePlanFromApi.estimatedFare!.toStringAsFixed(2)}" // Assuming estimatedFare is for the plan
-                          : "N/A"; // Or fetch price per driver type
-
-                      // Calculate ETA (example: 2 minutes per km, min 3 mins)
-                      final String etaDisplay = driver.distance != null
-                          ? "Pickup: In ${(driver.distance! * 2).round().clamp(3, 60)} min"
-                          : "Pickup: In 3-5 min";
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: Image.asset( // Generic car image for all types for now
-                              "assets/images/car2.png", // Ensure this path is correct
-                              width: MediaQuery.of(sheetContext).size.width * 0.45,
-                              height: 90,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.directions_car_filled, size: 60, color: Colors.grey),
-                            ),
+                  if (selectedCarFromApi != null) ...[
+                    Align(
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        "assets/images/car2.png",
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 90,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          selectedCarFromApi.serviceType ?? "Standard Taxi",
+                          style: globalTextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  driver.vehicleName ?? "Standard Taxi", // Use vehicleName from driver
-                                  style: globalTextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                fareDisplay, // This is currently the plan's fare. Adjust if drivers have individual fares.
-                                style: globalTextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                        ),
+                        Text(
+                          selectedCarFromApi.totalAmount != null
+                              ? "\$${selectedCarFromApi.totalAmount!.toStringAsFixed(2)}"
+                              : "N/A",
+                          style: globalTextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            etaDisplay,
-                            style: globalTextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: const Color(0xFF777F8B)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Pickup: In 3 min",
+                      style: globalTextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF777F8B),
+                      ),
+                    ),
+                    if (selectedCarFromApi.specialNotes != null &&
+                        selectedCarFromApi.specialNotes!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          selectedCarFromApi.specialNotes!,
+                          style: globalTextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF777F8B),
                           ),
-                          // If NearbyDriverModel had specialNotes, you could display them here
-                          // if (driver.specialNotes != null && driver.specialNotes!.isNotEmpty)
-                          //   Padding(...),
-                          const SizedBox(height: 15),
-                          CustomButton(
-                            title: "Choose This Taxi",
-                            borderColor: Colors.transparent, // Handled by CustomButton
-                            onPress: () {
-                              // IMPORTANT: Pass data related to the *selected driver* and the *ride plan*
-                              Get.to(() => ConfirmPickUpScreen(), arguments: {
-                                'ridePlanId': ridePlanFromApi.id,
-                                'selectedDriverId': driver.id, // Pass driver's ID
-                                'selectedVehicleId': driver.vehicleId, // Pass vehicle ID
-                                'selectedVehicleName': driver.vehicleName,
-                                'pickupAddress': ridePlanFromApi.pickup,
-                                'dropOffAddress': ridePlanFromApi.dropOff,
-                                "pickupDate":ridePlanFromApi.pickupDate,
-                                "pickupTime":ridePlanFromApi.pickupTime,
-                                // Fare might need to be recalculated or confirmed if it varies by driver/vehicle
-                                'estimatedFare': ridePlanFromApi.estimatedFare, // Or a driver-specific fare
-                                'driverLat': driver.lat, // For ConfirmPickUpScreen if needed
-                                'driverLng': driver.lng, // For ConfirmPickUpScreen if needed
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 15),
-                          const Divider(), // Divider between taxi options
-                        ],
-                      );
-                    }).toList()
-                  else
+                        ),
+                      ),
+                  ] else ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20.0),
                       child: Center(
                         child: Text(
-                          "No taxis currently available for this route.",
-                          style: globalTextStyle(color: Colors.grey.shade600, fontSize: 15),
+                          "No car assigned yet. Please select a driver below.",
+                          style: globalTextStyle(color: Colors.grey.shade600),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
+                  ],
+
+                  const SizedBox(height: 15),
+                  const Divider(),
+                  const SizedBox(height: 15),
+
+                  Text(
+                    "Nearby Drivers",
+                    style: globalTextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (ridePlanFromApi.nearbyDrivers != null &&
+                      ridePlanFromApi.nearbyDrivers!.isNotEmpty) ...[
+                    ...ridePlanFromApi.nearbyDrivers!.map((driver) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.directions_car,
+                                color: Colors.blue.shade700,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    driver.fullName ?? 'Driver ',
+                                    style: globalTextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    driver.vehicleName,
+                                    style: globalTextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF777F8B),
+                                    ),
+                                  ),
+                                  Text(
+                                    "Distance: ${driver.distance.toStringAsFixed(2)} km",
+                                    style: globalTextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: const Color(0xFF777F8B),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              final LatLng driverPos = LatLng(driver.lat, driver.lng);
+                              mainMapController.addMapMarker(
+                                driverPos,
+                                driver.fullName ?? 'Driver ${driver.id}',
+                                MarkerType.car,
+                                idSuffix: driver.id,
+                              );
+                              mainMapController.selectDriver(driver);
+                              Get.snackbar("Driver Selected", "Selected ${driver.fullName ?? 'Driver ${driver.id}'}");
+                            },
+                            child: Text(
+                              "Select",
+                              style: globalTextStyle(fontSize: 14),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFFDC71),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+                  ] else ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        "No nearby drivers available.",
+                        style: globalTextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ),
+                  ],
+
                   // --- END OF MODIFIED SECTION ---
 
-                  /*const SizedBox(height: 15), // Spacing before Payment Method
+                  const SizedBox(height: 15), // Spacing before Payment Method
                   Text(
                     "Payment Method",
                     style: globalTextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -320,6 +387,7 @@ class ExpandedBottomSheet extends StatelessWidget {
                   const SizedBox(height: 12),
                   InkWell(
                     onTap: () {
+                      Get.to(WidgetAddNewCard());
                       Get.snackbar("Payment", "Navigate to add/select card screen.");
                     },
                     child: Padding(
@@ -341,7 +409,50 @@ class ExpandedBottomSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 25), */// Bottom padding
+                  const SizedBox(height: 25), // Bottom padding
+                  const SizedBox(height: 15),
+                  const Divider(),
+                  const SizedBox(height: 15),
+                  CustomButton(
+                    title: "Choose This Taxi",
+                    borderColor: Colors.transparent,
+                    backgroundColor: selectedCarFromApi != null
+                        ? const Color(0xFFFFDC71)
+                        : Colors.grey,
+                    onPress: selectedCarFromApi != null
+                        ? () {
+                      final selectedDriver = mainMapController.selectedDriver.value;
+                      if (selectedDriver == null) {
+                        Get.snackbar("Selection Error", "Please select a driver first.");
+                        return;
+                      }
+                      if (ridePlanFromApi.id == null || ridePlanFromApi.pickup == null || ridePlanFromApi.dropOff == null) {
+                        Get.snackbar("Error", "Incomplete ride data. Please try again.");
+                        return;
+                      }
+
+                      Get.to(() => ConfirmPickUpScreen(), arguments: {
+                        'ridePlanId': ridePlanFromApi.id!,
+                        'totalAmount': selectedCarFromApi.totalAmount!,
+                        'transportId': selectedCarFromApi.id!,
+                        'selectedDriverId': selectedDriver.id,
+                        'selectedVehicleId': selectedDriver.vehicleId,
+                        'selectedVehicleName': selectedDriver.vehicleName,
+                        'pickupAddress': ridePlanFromApi.pickup!,
+                        'dropOffAddress': ridePlanFromApi.dropOff!,
+                        'pickupDate': ridePlanFromApi.pickupDate ?? DateTime.now().toIso8601String(),
+                        'pickupTime': ridePlanFromApi.pickupTime ?? TimeOfDay.now().format(context),
+                        'driverLat': selectedDriver.lat,
+                        'driverLng': selectedDriver.lng,
+                        'estimatedFare': selectedCarFromApi.totalAmount ?? ridePlanFromApi.estimatedFare ?? 0,
+                      });
+                    }
+                        : () {
+                      Get.snackbar("Selection Error",
+                          "No car option available to choose. Please select a driver first.");
+                    },
+                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

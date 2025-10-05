@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup_controller.dart';
+
 import '../controler/confirm_pick_up_api_controller.dart';
 
 class ExpandedBottomSheet1 extends StatelessWidget {
@@ -38,8 +39,11 @@ class ExpandedBottomSheet1 extends StatelessWidget {
     // Data for the API call - Retrieve all necessary IDs
     final String ridePlanId = args['ridePlanId']?.toString() ?? "";
     final String selectedDriverId = args['selectedDriverId']?.toString() ?? ""; // Added back
-    final String selectedRiderId = args['ridePlanId']?.toString() ?? ""; // Added back
+    //final String selectedRiderId = args['ridePlanId']?.toString() ?? ""; // Added back
     final String selectedVehicleId = args['selectedVehicleId']?.toString() ?? "";
+
+
+
 
     // Note: actualPickupTime/Date from args are ignored in this implementation
     // as we rely on the current time due to the arguments being empty.
@@ -124,6 +128,7 @@ class ExpandedBottomSheet1 extends StatelessWidget {
                     );
                   }
                   return CustomButton(
+                    backgroundColor: Colors.amberAccent,
                     title: "Confirm Pick-up",
                     onPress: () async {
                       // --- Get Current Date and Time for the API Call ---
@@ -148,8 +153,6 @@ class ExpandedBottomSheet1 extends StatelessWidget {
                       // Call the API method with the CURRENT date and time
                       final isSuccess = await apiController.confirmPickUpApiCallMethod(
                           ridePlanId,
-                        // Use generated current time
-                            // Use generated current date
                           selectedVehicleId
                       );
 
