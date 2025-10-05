@@ -26,7 +26,7 @@ class RideCompleteApiController extends GetxController {
       final url = Urls.carTransportsCompleted(id);
       print("API Request URL: $url");
 
-      NetworkResponse response = await NetworkCall.getRequest(url: url);
+      NetworkResponse response = await NetworkCall.getRequest(url: url,);
       print("API Response - Status: ${response.isSuccess}");
 
       if (response.isSuccess && response.responseData?['data'] != null) {

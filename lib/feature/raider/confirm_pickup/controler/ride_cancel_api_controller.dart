@@ -21,7 +21,7 @@ class RideCancelApiController extends GetxController{
       "cancelReason": "Changed my mind"
     };
     NetworkResponse response = await NetworkCall.patchRequest(
-        url: Urls.riderRideCancel(id), body: mapBody);
+        url: Urls.riderRideCancel(id), body: mapBody,);
 
     if (response.isSuccess) {
       await CancelRideModel.fromJson(response.responseData!['data']);

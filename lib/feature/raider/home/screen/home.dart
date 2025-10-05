@@ -7,10 +7,19 @@ import 'package:naderhosn/feature/raider/home/controller/home_controller.dart';
 import 'package:naderhosn/feature/raider/location_picker/screen/location_picker.dart';
 
 class HomeScreen extends StatelessWidget {
+  final double? lat;
+  final double? lng;
+
+  HomeScreen({this.lat, this.lng});
+
   final HomeController controller = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
+    if (lat != null && lng != null) {
+      controller.updateMarkerPosition(LatLng(lat!, lng!));
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -18,25 +27,24 @@ class HomeScreen extends StatelessWidget {
             return GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: controller.markerPosition.value,
-                zoom: 14,
+                zoom: 16,
               ),
+              onMapCreated: (mapController) {
+                controller.setMapController(mapController);
+              },
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
               markers: {
                 Marker(
-                  markerId: const MarkerId('Destination'),
-                  position: controller.markerPosition.value!,
-                  infoWindow: const InfoWindow(title: 'Destination Location'),
-                  icon:
-                      controller.customMarkerIcon.value ??
-                      BitmapDescriptor.defaultMarker,
+                  markerId: const MarkerId("currentLocation"),
+                  position: controller.markerPosition.value,
+                  icon: controller.customMarkerIcon.value,
+                  infoWindow: const InfoWindow(title: "You are here"),
                 ),
-              },
-              onTap: (LatLng position) {
-                controller.updateMarkerPosition(
-                  position,
-                ); // Update marker position on map tap
               },
             );
           }),
+
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 60),
             child: Text(
@@ -48,7 +56,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          ExpandedBottomSheetHome(),
+          const ExpandedBottomSheetHome(),
         ],
       ),
     );
@@ -91,22 +99,20 @@ class ExpandedBottomSheetHome extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Search Container
                 GestureDetector(
                   onTap: () => Get.to(() => LocationPicker()),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                        25,
-                      ), // Rounded corners
+                      borderRadius: BorderRadius.circular(25),
                     ),
                     child: Row(
                       children: [
                         Icon(Icons.search, color: Colors.grey[700]),
-                        SizedBox(width: 10),
-                        Expanded(child: Text("Search...")),
+                        const SizedBox(width: 10),
+                        const Expanded(child: Text("Search...")),
                       ],
                     ),
                   ),
@@ -130,7 +136,7 @@ import 'package:naderhosn/feature/raider/location_picker/screen/location_picker.
 class HomeScreen extends StatelessWidget {
   final HomeController controller = Get.put(HomeController());
 
-  HomeScreen({super.key});
+  HomeScreen({super.key, required lat, required lng});
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
-import '../../../../core/style/global_text_style.dart';
 import 'package:naderhosn/feature/bottom_nav_user/screen/bottom_nav_user.dart';
+import '../../../../core/style/global_text_style.dart';
 import '../controller/ride_complete_api_controller.dart';
 import 'package:intl/intl.dart';
 
@@ -15,31 +14,27 @@ class RideCompletedScreen extends StatefulWidget {
 }
 
 class _RideCompletedScreenState extends State<RideCompletedScreen> {
-  // We only need the API controller for this screen's data
   final RideCompleteApiController rideCompleteApiController = Get.put(RideCompleteApiController());
 
   @override
   void initState() {
     super.initState();
 
-    // The most reliable way to get the ID is from the arguments passed to this screen.
+    // Retrieve transportId from Get.arguments
     final args = Get.arguments as Map<String, dynamic>? ?? {};
     final String transportId = args['transportId']?.toString() ?? '';
 
     if (transportId.isNotEmpty) {
-      // Use a post-frame callback to ensure the widget is built before controller updates.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         debugPrint("RideCompletedScreen initState: Calling API with ID: $transportId");
         rideCompleteApiController.redeConpleteApiMethod(transportId);
       });
     } else {
       debugPrint("⚠️ RideCompletedScreen: No transport ID found in arguments - skipping API call.");
-      // Optionally show an error immediately
       rideCompleteApiController.errorMessage.value = "Ride details could not be loaded. No ID provided.";
     }
   }
 
-  // Helper function for creating a row of ride details
   Widget _buildDetailRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -67,12 +62,10 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
     return Scaffold(
       body: SafeArea(
         child: Obx(() {
-          // Show a loading indicator while data is being fetched
           if (rideCompleteApiController.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Show an error message if the API call failed
           if (rideCompleteApiController.errorMessage.value.isNotEmpty && rideCompleteApiController.rideData.value == null) {
             return Center(
               child: Padding(
@@ -96,7 +89,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
                     const SizedBox(height: 24),
                     CustomButton(
                       title: "Go to Home",
-                      onPress: () => Get.offAll(() => BottomNavbarUser()), // Use offAll to clear nav stack
+                      onPress: () => Get.offAll(const BottomNavbarUser()), // Fixed: Use widget constructor
                     ),
                   ],
                 ),
@@ -104,13 +97,10 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
             );
           }
 
-          // Main UI when data is available
           final rideData = rideCompleteApiController.rideData.value;
-          final user = rideData?.user;
-          final String profileImageUrl = rideData?.vehicle?.driver?.profileImage ?? ''; // Correct path to driver image
+          final String profileImageUrl = rideData?.vehicle?.driver?.profileImage ?? '';
           final bool isProfileImageValid = profileImageUrl.isNotEmpty && profileImageUrl.startsWith('http');
 
-          // Format date for display - THIS WILL NOW WORK
           final String completedDate = (rideData?.updatedAt != null && rideData!.updatedAt!.isNotEmpty)
               ? DateFormat('d MMMM yyyy').format(DateTime.parse(rideData!.updatedAt!))
               : 'N/A';
@@ -138,7 +128,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Driver info card (using driver from vehicle object)
+                // Driver info card
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   decoration: BoxDecoration(
@@ -150,20 +140,13 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
                       CircleAvatar(
                         radius: 25,
                         backgroundColor: Colors.grey.shade200,
-                        backgroundImage: isProfileImageValid
-                            ? NetworkImage(profileImageUrl)
-                            : null,
-                        child: !isProfileImageValid
-                            ? const Icon(Icons.person, size: 30, color: Colors.grey)
-                            : null,
+                        backgroundImage: isProfileImageValid ? NetworkImage(profileImageUrl) : null,
+                        child: !isProfileImageValid ? const Icon(Icons.person, size: 30, color: Colors.grey) : null,
                       ),
                       const SizedBox(width: 10),
                       Text(
                         rideData?.vehicle?.driver?.fullName ?? "Driver",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -196,7 +179,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Ride details using helper
+                // Ride details
                 _buildDetailRow("Ride Cost", "\$${rideData?.totalAmount?.toStringAsFixed(2) ?? '0.00'}"),
                 _buildDetailRow("Payment method", rideData?.paymentMethod ?? 'N/A'),
                 _buildDetailRow("Ride Type", rideData?.serviceType ?? 'N/A'),
@@ -213,9 +196,7 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                   backgroundColor: const Color(0xFFFFDC71),
-                  onPress: () {
-                    Get.offAll(() => BottomNavbarUser());
-                  },
+                  onPress: () => Get.offAll(const BottomNavbarUser()),
                 ),
               ],
             ),
@@ -225,7 +206,6 @@ class _RideCompletedScreenState extends State<RideCompletedScreen> {
     );
   }
 
-  // Helper widget for location rows to avoid code repetition
   Widget _buildLocationRow({required IconData icon, required String title, required String location}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

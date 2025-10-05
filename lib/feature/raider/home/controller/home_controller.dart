@@ -6,24 +6,75 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeController extends GetxController {
   var isBottomSheetOpen = false.obs;
-  var markerPosition = LatLng(37.7749, -122.4194).obs;
+  var markerPosition = const LatLng(23.8103, 90.4125).obs; // fallback Dhaka
   var customMarkerIcon = BitmapDescriptor.defaultMarker.obs;
+
+  GoogleMapController? mapController;
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     _loadCustomMarkerWithLabel("You");
+    _trackCurrentLocation(); // ✅ realtime tracking
   }
 
-  // Update marker position
+  void setMapController(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  // Update marker position manually
   void updateMarkerPosition(LatLng position) {
     markerPosition.value = position;
   }
 
+  // ✅ Track user current location
+  void _trackCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check service
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    // Check permission
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location permissions are permanently denied');
+    }
+
+    // Listen to location changes
+    Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 1, // প্রতি 10 মিটার পর আপডেট হবে
+      ),
+    ).listen((Position position) {
+      final currentLatLng = LatLng(position.latitude, position.longitude);
+      markerPosition.value = currentLatLng;
+
+      // Camera move করাও
+      if (mapController != null) {
+        mapController!.animateCamera(
+          CameraUpdate.newLatLng(currentLatLng),
+        );
+      }
+    });
+  }
+
+  // ✅ Custom Marker with Label
   Future<void> _loadCustomMarkerWithLabel(String label) async {
     final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
@@ -35,7 +86,7 @@ class HomeController extends GetxController {
 
     final ui.Codec codec = await ui.instantiateImageCodec(
       bytes,
-      targetWidth: 250,
+      targetWidth: 120,
     );
     final ui.FrameInfo fi = await codec.getNextFrame();
     final ui.Image image = fi.image;
@@ -47,7 +98,7 @@ class HomeController extends GetxController {
     textPainter.text = TextSpan(
       text: label,
       style: const TextStyle(
-        fontSize: 20,
+        fontSize: 18,
         color: Colors.black,
         fontWeight: FontWeight.bold,
         backgroundColor: Colors.yellow,
