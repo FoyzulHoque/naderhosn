@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:naderhosn/core/services_class/shared_preferences_helper.dart';
 import '../../../../core/network_caller/endpoints.dart';
 import '../../../../core/services_class/data_helper.dart';
 import '../model/my_ride_model.dart';
@@ -31,7 +30,7 @@ class RideControllers extends GetxController {
       }
 
       var url = Uri.parse(
-          '${Urls.baseURL}/carTransports/my-rides');
+          '${Urls.baseUrl}/carTransports/my-rides');
 
       var headers = {'Authorization': token};
 
@@ -69,7 +68,7 @@ class RideControllers extends GetxController {
         return;
       }
 
-      final url = Uri.parse('${Urls.baseURL}/carTransports/my-rides-history');
+      final url = Uri.parse('${Urls.baseUrl}/carTransports/my-rides-history');
       final response = await http.get(
         url,
         headers: {

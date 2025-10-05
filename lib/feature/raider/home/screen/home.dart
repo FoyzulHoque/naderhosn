@@ -130,7 +130,7 @@ import 'package:naderhosn/feature/raider/location_picker/screen/location_picker.
 class HomeScreen extends StatelessWidget {
   final HomeController controller = Get.put(HomeController());
 
-  HomeScreen({super.key});
+  HomeScreen({super.key, double? lat, double? lng});
 
   @override
   Widget build(BuildContext context) {

@@ -217,7 +217,7 @@ class ChatController extends GetxController {
   }
 
   Future<String?> _uploadImageToServer(String token) async {
-    final uri = Uri.parse('${Urls.baseURL}/chats/upload-images');
+    final uri = Uri.parse('${Urls.baseUrl}/chats/upload-images');
     final request = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = token;
 

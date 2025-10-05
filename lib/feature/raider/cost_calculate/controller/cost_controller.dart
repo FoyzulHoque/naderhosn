@@ -12,22 +12,27 @@ class FareController extends GetxController {
   var isLoading = false.obs;
   var fare = Rxn<FareModel>();
   var calculatedFare = Rxn<CalculatedFareModel>();
-
-  var locationPickerController = Get.put(()=> LocationPickerController());
+  final LocationPickerController locationPickerController = Get.put(LocationPickerController());
 
   Future<void> fetchFareData(String token) async {
+    if (token.isEmpty) {
+      Get.snackbar("Error", "Authentication token is missing");
+      print("❌ Token is empty");
+      return;
+    }
+
     try {
       isLoading.value = true;
-      print("🔄 Fetching fare data...");
+      print("🔄 Fetching fare data with token: $token");
 
       final response = await http.get(
-        Uri.parse("${Urls.baseURL}/estimateFares/getMyEstimatelist"),
+        Uri.parse("${Urls.baseUrl}/estimateFares/getMyEstimatelist"),
         headers: {
           "Content-Type": "application/json",
-          "Authorization": token,  // ✅ raw token use
+          "Authorization": token,
         },
       );
-      print("token:  $token");
+
       print("📡 API Status: ${response.statusCode}");
       print("📥 API Response: ${response.body}");
 
@@ -38,25 +43,31 @@ class FareController extends GetxController {
           final fareList = data["data"] as List<dynamic>;
           if (fareList.isNotEmpty) {
             fare.value = FareModel.fromJson(fareList.first);
+            print("✅ Fare data loaded: ${fare.value?.baseFare}");
+          } else {
+            print("❌ No fare data found in response");
+            Get.snackbar("Error", "No fare data available");
           }
-        }
-        else {
+        } else {
           print("❌ Invalid data format received: $data");
-          Get.snackbar("Error", "Invalid data format received");
+          Get.snackbar("Error", "Invalid fare data format");
         }
+      } else if (response.statusCode == 401) {
+        print("❌ Unauthorized: Invalid or expired token");
+        Get.snackbar("Error", "Session expired. Please log in again.");
+        Get.offAllNamed('/login'); // Navigate to LoginView
       } else {
         print("❌ Failed to load fare data: ${response.statusCode}");
         Get.snackbar("Error", "Failed to load fare data: ${response.statusCode}");
       }
     } catch (e) {
-      print("❌ Exception: $e");
-      Get.snackbar("Error", e.toString());
+      print("❌ Exception in fetchFareData: $e");
+      Get.snackbar("Error", "Unable to load fare data. Please try again.");
     } finally {
       isLoading.value = false;
       print("✅ Fetch completed");
     }
   }
-
 
   Future<Map<String, dynamic>?> calculateFare({
     required String pickup,
@@ -66,15 +77,21 @@ class FareController extends GetxController {
     required double dropOffLat,
     required double dropOffLng,
   }) async {
+    final token = AuthController.accessToken;
+    if (token == null || token.isEmpty) {
+      print("❌ Token is null or empty");
+      Get.snackbar("Error", "Please log in to calculate fare");
+      Get.offAllNamed('/login'); // Navigate to LoginView
+      return null;
+    }
+
     try {
       isLoading.value = true;
       print("🔄 Calculating fare with backend...");
 
-      final url = Uri.parse('${Urls.baseURL}/estimateFares/calculate-fare');
-      final token = AuthController.accessToken;
-
+      final url = Uri.parse('${Urls.baseUrl}/estimateFares/calculate-fare');
       final headers = <String, String>{
-        'Authorization': token ?? '',
+        'Authorization': token,
         'Content-Type': 'application/json',
       };
 
@@ -84,7 +101,7 @@ class FareController extends GetxController {
         "pickupLat": pickupLat,
         "pickupLng": pickupLng,
         "dropOffLat": dropOffLat,
-        "dropOffLng": dropOffLng
+        "dropOffLng": dropOffLng,
       });
 
       print("📤 Sending data: $body");
@@ -98,35 +115,36 @@ class FareController extends GetxController {
         final data = json.decode(response.body);
         print("✅ Fare calculated successfully");
         print("📊 Response data: $data");
-        
-        // Parse the calculated fare from response
+
         if (data is Map<String, dynamic> && data.containsKey("data")) {
           final fareData = data["data"] as Map<String, dynamic>;
           calculatedFare.value = CalculatedFareModel.fromJson(fareData);
           print("✅ Calculated fare parsed: ${calculatedFare.value?.totalFare}");
+          return data;
         } else {
           print("❌ Invalid response structure: $data");
+          Get.snackbar("Error", "Invalid fare calculation response");
+          return null;
         }
-        
-        return data;
+      } else if (response.statusCode == 401) {
+        print("❌ Unauthorized: Invalid or expired token");
+        Get.snackbar("Error", "Session expired. Please log in again.");
+        Get.offAllNamed('/login');
+        return null;
       } else {
         print('❌ Error: ${response.statusCode}');
-        print('❌ Response: ${response.body}');
         Get.snackbar("Error", "Failed to calculate fare: ${response.statusCode}");
         return null;
       }
     } catch (e) {
       print("❌ Exception in calculateFare: $e");
-      Get.snackbar("Error", "Failed to calculate fare: $e");
+      Get.snackbar("Error", "Unable to calculate fare. Please try again.");
       return null;
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// =======================
-  /// Calculate Distance
-  /// =======================
   double calculateDistance(
       double pickupLat,
       double pickupLng,
@@ -139,14 +157,11 @@ class FareController extends GetxController {
       dropLat,
       dropLng,
     );
-    double distanceKm = distanceInMeters / 1000; // km
+    double distanceKm = distanceInMeters / 1000;
     print("📏 Distance: $distanceKm km");
     return distanceKm;
   }
 
-  /// =======================
-  /// Calculate Total Fare
-  /// =======================
   double calculateTotalFare(
       double distanceKm, {
         int durationMinutes = 0,
@@ -154,6 +169,7 @@ class FareController extends GetxController {
       }) {
     if (fare.value == null) {
       print("⚠️ Fare data is null, returning 0");
+      Get.snackbar("Error", "Fare data not available");
       return 0.0;
     }
 

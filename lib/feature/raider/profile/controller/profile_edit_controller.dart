@@ -36,7 +36,7 @@ class UpdateProfileController extends GetxController {
     try {
       EasyLoading.show(status: "Loading...");
 
-      final url = Uri.parse("${Urls.baseURL}/users/update-profile");
+      final url = Uri.parse("${Urls.baseUrl}/users/update-profile");
       final token =  AuthController.accessToken;
 
 
@@ -99,7 +99,7 @@ class UpdateProfileController extends GetxController {
       if (token == null) return null;
 
       final response = await http.get(
-        Uri.parse("${Urls.baseURL}/users/get-me"),
+        Uri.parse("${Urls.baseUrl}/users/get-me"),
         headers: {"Authorization": token},
       );
 

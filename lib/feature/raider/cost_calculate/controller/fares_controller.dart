@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import '../../../../../core/network_caller/endpoints.dart';
 import '../../../../../core/network_caller/network_config.dart';
 import '../../../../core/network_path/natwork_path.dart';
 import '../../../../core/services_class/shared_preferences_helper.dart';
@@ -34,7 +33,7 @@ class FaresController extends GetxController {
 
       NetworkResponse response = await NetworkCall.getRequest(
         url: NetworkPath.getCurrentFare,
-        headers: headers,  // now it works
+  // now it works
       );
 
 
