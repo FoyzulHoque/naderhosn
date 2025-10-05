@@ -7,7 +7,6 @@ import 'package:naderhosn/feature/raider/choose_taxi/controler/choose_taxi_contr
 import 'package:naderhosn/feature/raider/confirm_pickup/screen/confirm_pickup.dart';
 import '../controler/choose_taxi_api_controller.dart';
 import '../model/choose_taxi_model.dart';
-import '../model/location_searching_model.dart';
 import '../widget/widget_add_new_card.dart';
 
 class ChooseTaxiScreen extends StatelessWidget {
@@ -431,9 +430,11 @@ class ExpandedBottomSheet extends StatelessWidget {
                         Get.snackbar("Error", "Incomplete ride data. Please try again.");
                         return;
                       }
+
                       Get.to(() => ConfirmPickUpScreen(), arguments: {
                         'ridePlanId': ridePlanFromApi.id!,
                         'totalAmount': selectedCarFromApi.totalAmount!,
+                        'transportId': selectedCarFromApi.id!,
                         'selectedDriverId': selectedDriver.id,
                         'selectedVehicleId': selectedDriver.vehicleId,
                         'selectedVehicleName': selectedDriver.vehicleName,
