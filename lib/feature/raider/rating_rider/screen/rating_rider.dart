@@ -7,16 +7,38 @@ import 'package:naderhosn/feature/raider/rating_rider/controller/rating_rider_co
 import '../../choose_taxi/controler/choose_taxi_api_controller.dart';
 import '../controller/rating_rider_api_controller.dart';
 
-class RatingScreen extends StatelessWidget {
+class RatingScreen extends StatefulWidget {
+  @override
+  State<RatingScreen> createState() => _RatingScreenState();
+}
+
+class _RatingScreenState extends State<RatingScreen> {
   final RatingController controller = Get.put(
     RatingController(),
-  ); // Initialize the controller
+  );
+  String transportId = '';
 
+  // Initialize the controller
   final ChooseTaxiApiController apiController = Get.find<ChooseTaxiApiController>();
+
   final RatingRiderApiController riderApiMethod = Get.find<RatingRiderApiController>();
 
+  @override
+  void initState() {
+    super.initState();
 
+    if (apiController.rideDataList.isNotEmpty &&
+        apiController.rideDataList[0].carTransport != null &&
+        apiController.rideDataList[0].carTransport!.isNotEmpty) {
+      transportId = apiController.rideDataList[0].carTransport![0].id ?? '';
+    }
 
+    // 2. Fallback: Try to get ID from Get.arguments
+    if (transportId.isEmpty) {
+      final args = Get.arguments as Map<String, dynamic>? ?? {};
+      transportId = args['transportId']?.toString() ?? '';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +132,7 @@ class RatingScreen extends StatelessWidget {
   }
 
   Future<void>_submitRating() async {
-    String transportId = '';
+    /*String transportId = '';
 
     // 1. Try to get ID from the primary controller (ChooseTaxiApiController)
     if (apiController.rideDataList.isNotEmpty &&
@@ -123,7 +145,7 @@ class RatingScreen extends StatelessWidget {
     if (transportId.isEmpty) {
       final args = Get.arguments as Map<String, dynamic>? ?? {};
       transportId = args['transportId']?.toString() ?? '';
-    }
+    }*/
 
     if (transportId.isNotEmpty) {
       debugPrint("ExpandedBottomSheet6 initState: Calling API with ID: $transportId");

@@ -277,7 +277,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                               "${vehicle?.manufacturer ?? ''} ${vehicle?.model ?? ''}".trim(),
+                              "${vehicle?.manufacturer ?? ''} ${vehicle?.model ?? ''}".trim(),
                               style: globalTextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
