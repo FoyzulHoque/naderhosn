@@ -1,13 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup_controller.dart';
 
-class ExpandedBottomSheet4 extends StatelessWidget {
+import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
+import '../../choose_taxi/controler/choose_taxi_api_controller.dart';
+import '../controler/ride_cancel_api_controller.dart';
+
+class ExpandedBottomSheet4 extends StatefulWidget {
   ExpandedBottomSheet4({super.key});
 
+  @override
+  State<ExpandedBottomSheet4> createState() => _ExpandedBottomSheet4State();
+}
+
+class _ExpandedBottomSheet4State extends State<ExpandedBottomSheet4> {
+  String transportId = '';
+
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());
+
+  final RideCancelApiController rideCancelApiController = Get.put(RideCancelApiController());
+  final ChooseTaxiApiController apiController = Get.find<ChooseTaxiApiController>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 1. PRIORITY: Get ID from ConfirmPickupController (post-ride creation)
+    if (controller.carTransportId.value != null && controller.carTransportId.value!.isNotEmpty) {
+      transportId = controller.carTransportId.value!;
+      debugPrint("ExpandedBottomSheet4 initState: Using ID from ConfirmPickupController: $transportId");
+    } else {
+      // Fallback: Try ChooseTaxiApiController
+      if (apiController.rideDataList.isNotEmpty &&
+          apiController.rideDataList[0].carTransport != null &&
+          apiController.rideDataList[0].carTransport!.isNotEmpty) {
+        transportId = apiController.rideDataList[0].carTransport![0].id ?? '';
+        debugPrint("ExpandedBottomSheet4 initState: Fallback to ChooseTaxiApiController ID: $transportId");
+      } else {
+        // Final fallback: Get.arguments
+        final args = Get.arguments as Map<String, dynamic>? ?? {};
+        transportId = args['transportId']?.toString() ?? '';
+        debugPrint("ExpandedBottomSheet4 initState: Fallback to arguments ID: $transportId");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,135 +119,36 @@ class ExpandedBottomSheet4 extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 10),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      controller.selectContainerEffect(1);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: controller.selectedIndex.value == 1
-                            ? Color(0xFFFFF4D4)
-                            : Colors.white,
-                      ),
-                      child: _buildRow(
-                        title: "Selected wrong pick-up",
-                        imagePath: "assets/icons/icon5.png",
-                      ),
-                    ),
-                  ),
-                ),
+
+                // --- Cancellation Reasons List (using a helper function) ---
+                _buildReasonItem(1, "Selected wrong pick-up", "assets/icons/icon5.png"),
                 Divider(),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      controller.selectContainerEffect(2);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: controller.selectedIndex.value == 2
-                            ? Color(0xFFFFF4D4)
-                            : Colors.white,
-                      ),
-                      child: _buildRow(
-                        title: "Selected wrong drop-off ",
-                        imagePath: "assets/icons/icon6.png",
-                      ),
-                    ),
-                  ),
-                ),
+                _buildReasonItem(2, "Selected wrong drop-off ", "assets/icons/icon6.png"),
                 Divider(),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      controller.selectContainerEffect(3);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: controller.selectedIndex.value == 3
-                            ? Color(0xFFFFF4D4)
-                            : Colors.white,
-                      ),
-                      child: _buildRow(
-                        title: "Requested by accident",
-                        imagePath: "assets/icons/icon4.png",
-                      ),
-                    ),
-                  ),
-                ),
+                _buildReasonItem(3, "Requested by accident", "assets/icons/icon4.png"),
                 Divider(),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      controller.selectContainerEffect(4);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: controller.selectedIndex.value == 4
-                            ? Color(0xFFFFF4D4)
-                            : Colors.white,
-                      ),
-                      child: _buildRow(
-                        title: "Wait time was too long",
-                        imagePath: "assets/icons/icon3.png",
-                      ),
-                    ),
-                  ),
-                ),
+                _buildReasonItem(4, "Wait time was too long", "assets/icons/icon3.png"),
                 Divider(),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      controller.selectContainerEffect(5);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: controller.selectedIndex.value == 5
-                            ? Color(0xFFFFF4D4)
-                            : Colors.white,
-                      ),
-                      child: _buildRow(
-                        title: "Requested wrong vehicle",
-                        imagePath: "assets/icons/icon2.png",
-                      ),
-                    ),
-                  ),
-                ),
+                _buildReasonItem(5, "Requested wrong vehicle", "assets/icons/icon2.png"),
                 Divider(),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      controller.selectContainerEffect(6);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        color: controller.selectedIndex.value == 6
-                            ? Color(0xFFFFF4D4)
-                            : Colors.white,
-                      ),
-                      child: _buildRow(
-                        title: "Other",
-                        imagePath: "assets/icons/icon1.png",
-                      ),
-                    ),
-                  ),
-                ),
+                _buildReasonItem(6, "Other", "assets/icons/icon1.png"),
+
                 SizedBox(height: 20),
-                CustomButton(
-                  title: "Keep my trip ",
+
+                // Only the CustomButton needs to be reactive to the loading state.
+                Obx(() => CustomButton(
+                  title: rideCancelApiController.isLoading.value
+                      ? 'Cancelling...'
+                      : "Cancel Trip",
                   borderColor: Colors.transparent,
-                  backgroundColor: Color(0xFFFFDC71),
+                  backgroundColor: const Color(0xFFFFDC71),
                   textStyle: globalTextStyle(fontWeight: FontWeight.bold),
-                  onPress: () {
-                    controller.changeSheet(2);
-                  },
-                ),
+                  onPress: rideCancelApiController.isLoading.value
+                      ? null
+                      : () => _rideCancelledMethod(),
+                )),
+
+                SizedBox(height: 20),
               ],
             ),
           ),
@@ -218,6 +157,25 @@ class ExpandedBottomSheet4 extends StatelessWidget {
     );
   }
 
+  // Helper function to build each selectable row item
+  Widget _buildReasonItem(int index, String title, String imagePath) {
+    return GestureDetector(
+      onTap: () {
+        rideCancelApiController.selectContainerEffect(index);
+      },
+      child: Obx(() => Container(
+        padding: EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: rideCancelApiController.selectedIndex.value == index
+              ? Color(0xFFFFF4D4)
+              : Colors.white,
+        ),
+        child: _buildRow(title: title, imagePath: imagePath), // Call the original _buildRow
+      )),
+    );
+  }
+
+  // Your original _buildRow for displaying the item content
   Widget _buildRow({required title, required imagePath}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -236,5 +194,51 @@ class ExpandedBottomSheet4 extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // ⭐️ MODIFIED: Logic to get ID AND the selected REASON for the API call
+  Future<void> _rideCancelledMethod() async {
+    // ⭐️ Get the reason stored in the RideCancelApiController
+    String reason = rideCancelApiController.selectedReasonTitle.value;
+
+    if (reason.isEmpty) {
+      Get.snackbar('Error', 'Please select a cancellation reason.', snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    // Logic to get transportId
+    // PRIORITY: Get ID from ConfirmPickupController
+    if (controller.carTransportId.value != null && controller.carTransportId.value!.isNotEmpty) {
+      transportId = controller.carTransportId.value!;
+      debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: Using ID from ConfirmPickupController: $transportId");
+    } else {
+      if (apiController.rideDataList.isNotEmpty &&
+          apiController.rideDataList[0].carTransport != null &&
+          apiController.rideDataList[0].carTransport!.isNotEmpty) {
+        transportId = apiController.rideDataList[0].carTransport![0].id ?? '';
+        debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: Fallback to ChooseTaxiApiController ID: $transportId");
+      } else {
+        final args = Get.arguments as Map<String, dynamic>? ?? {};
+        transportId = args['transportId']?.toString() ?? '';
+        debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: Fallback to arguments ID: $transportId");
+      }
+    }
+
+    if (transportId.isNotEmpty) {
+      debugPrint("Calling Cancel API with ID: $transportId and Reason: $reason");
+      // ⭐️ Pass both the ID and the Reason to the API controller
+      bool isSuccess = await rideCancelApiController.rideCancelApiMethod(transportId, reason);
+
+      if (isSuccess) {
+        // Navigate to the main screen on success
+        Get.offAll(() => BottomNavbarUser());
+        Get.snackbar('Success', 'Trip cancelled successfully!', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green);
+      } else {
+        // Show error message on failure
+        Get.snackbar('Failed', rideCancelApiController.errorMessage ?? 'Cancellation failed.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red);
+      }
+    } else {
+      Get.snackbar('Error', "Could not find a valid trip ID.", snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red);
+    }
   }
 }

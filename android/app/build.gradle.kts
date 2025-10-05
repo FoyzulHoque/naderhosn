@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -28,27 +27,23 @@ android {
     }
 
     signingConfigs {
-        create("debug") {
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
-            storeFile = file("debug.keystore") // Adjust path if needed
-            storePassword = "android"
-        }
-        // Add release signing config if needed, e.g.:
-        // create("release") {
-        //     keyAlias = System.getenv("KEY_ALIAS")
-        //     keyPassword = System.getenv("KEY_PASSWORD")
-        //     storeFile = file(System.getenv("KEYSTORE_PATH"))
-        //     storePassword = System.getenv("STORE_PASSWORD")
-        // }
+        // Removed custom debug signing config to avoid duplicate name error
+        // Add release signing config if needed
+        // create("release") { ... }
     }
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = true // Enable R8 minification
-            // useProguard is not needed; R8 is the default with ProGuard rules
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug") // Use release config if available
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            // Uncomment if you have a release signing config
+            // signingConfig = signingConfigs.getByName("release")
+        }
+        getByName("debug") {
+            // Flutter will automatically handle debug signing
         }
     }
 }
