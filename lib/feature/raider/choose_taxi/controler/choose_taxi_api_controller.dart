@@ -13,7 +13,7 @@ class ChooseTaxiApiController extends GetxController {
     try {
       isLoading.value = true;
       NetworkResponse response =
-      await NetworkCall.getRequest(url: Urls.carTransportsMyRidePlans);
+      await NetworkCall.getRequest(url: Urls.carTransportsMyRidePlans,);
       if (response.isSuccess) {
         final data = response.responseData!['data'];
         if (data is List) {

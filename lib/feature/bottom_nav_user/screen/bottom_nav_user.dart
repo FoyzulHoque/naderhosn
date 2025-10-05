@@ -31,7 +31,7 @@ class BottomNavbarUser extends StatelessWidget {
     // Define pages with dynamic arguments
     final List<Widget> pages = [
       HomeScreen(lat: lat, lng: lng),
-       CostCalculate(),
+      CostCalculate(),
       ChatScreen(carTransportId: carTransportId),
       const ProfileScreen(),
     ];
