@@ -1,3 +1,7 @@
+import org.gradle.api.tasks.Delete
+import org.gradle.kotlin.dsl.register
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.naderhosn" // Replace with your actual application ID
+    namespace = "com.example.naderhosn"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -18,8 +22,12 @@ android {
         jvmTarget = "17"
     }
 
+    kotlin {
+        jvmToolchain(17)
+    }
+
     defaultConfig {
-        applicationId = "com.example.naderhosn" // Replace with your actual application ID
+        applicationId = "com.example.naderhosn"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -27,9 +35,7 @@ android {
     }
 
     signingConfigs {
-        // Removed custom debug signing config to avoid duplicate name error
-        // Add release signing config if needed
-        // create("release") { ... }
+        // Add release signing config here if needed
     }
 
     buildTypes {
@@ -39,15 +45,21 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Uncomment if you have a release signing config
-            // signingConfig = signingConfigs.getByName("release")
         }
         getByName("debug") {
-            // Flutter will automatically handle debug signing
+            // Flutter handles debug signing automatically
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.jvmTarget = "17"
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:-options")
 }

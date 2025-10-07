@@ -10,6 +10,7 @@ class Urls {
   static const String forgotPass = '$_baseUrl/auth/forgot-password';
   static const String pickUpLocation = '$_baseUrl/carTransports/ride-plan';
   static const String carTransportsMyRidePlans = '$_baseUrl/carTransports/my-ride-plans';
+  static const String carTransportsMyRidesPending = '$_baseUrl/carTransports/my-rides-pending';
   static const String carTransportsCreate = '$_baseUrl/carTransports/create';
   static const String paymentsCreateCard = '$_baseUrl/payments/create-card';
   static const String paymentsSavedCards = '$_baseUrl/payments/saved-cards';

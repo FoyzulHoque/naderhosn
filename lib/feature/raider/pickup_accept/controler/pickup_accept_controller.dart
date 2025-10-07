@@ -6,15 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import '../../confirm_pickup/controler/driver_infor_api_controller.dart';
+
 class PickupAcceptController extends GetxController {
   var isBottomSheetOpen = false.obs;
   var isLoading = false.obs;
-  var markerPosition = LatLng(23.749341, 90.437213).obs; // Current marker (You)
-  var destinationPosition = LatLng(
-    23.749704,
-    90.430164,
-  ).obs; // Second marker (Destination)
-
+  var markerPosition = LatLng(23.749341, 90.437213).obs; // Initial fallback (Pickup)
+  var destinationPosition = LatLng(23.749704, 90.430164).obs; // Initial fallback (Dropoff)
   var customMarkerIcon = BitmapDescriptor.defaultMarker.obs;
   var customMarkerIconDriver = BitmapDescriptor.defaultMarker.obs;
   var customMarkerCar = BitmapDescriptor.defaultMarker.obs;
@@ -26,15 +24,59 @@ class PickupAcceptController extends GetxController {
     width: 5,
   ).obs;
 
+  // Time-related variables from API
+  var pickupDate = ''.obs;
+  var pickupTime = ''.obs;
+  var rideTime = 0.obs;
+  var waitingTime = 0.obs;
+
+  final DriverInfoApiController apiController = Get.put(DriverInfoApiController());
+
   @override
   void onInit() async {
     super.onInit();
-    await _loadCustomMarker("You");
-    await _loadCustomMarker2("You");
-    await _loadCustomMarkerCar("You");
 
-    addMarker(markerPosition.value, 'You');
-    addMarkerDriver(destinationPosition.value, 'Destination');
+    // Assume id is passed via Get.arguments when navigating to this screen
+    final String? id = Get.arguments as String?;
+
+    if (id != null) {
+      await apiController.driverInfoApiMethod(id);
+    }
+
+    final ride = apiController.rideData.value;
+    if (ride != null) {
+      // Set dynamic positions from API, fallback to static if null
+      markerPosition.value = LatLng(
+        ride.pickupLat ?? 23.749341,
+        ride.pickupLng ?? 90.437213,
+      );
+      destinationPosition.value = LatLng(
+        ride.dropOffLat ?? 23.749704,
+        ride.dropOffLng ?? 90.430164,
+      );
+
+      // Add driver marker if available
+      if (ride.driverLat != null && ride.driverLng != null) {
+        addMarkerCarAvailable(
+          LatLng(ride.driverLat!, ride.driverLng!),
+          'Driver',
+        );
+      }
+
+      // Set time-related data from API
+      pickupDate.value = ride.pickupDate ?? '';
+      pickupTime.value = ride.pickupTime ?? '';
+      rideTime.value = ride.rideTime ?? 0;
+      waitingTime.value = ride.waitingTime ?? 0;
+    }
+
+    // Load custom markers with appropriate labels
+    await _loadCustomMarker("Pickup");
+    await _loadCustomMarker2("Driver");
+    await _loadCustomMarkerCar("Dropoff");
+
+    addMarker(markerPosition.value, 'Pickup');
+    addMarkerDriver(destinationPosition.value, 'Dropoff');
   }
 
   // Toggle bottom sheet visibility

@@ -20,7 +20,7 @@ class PickupAcceptScreen extends StatelessWidget {
                 : GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: controllerPickupAccept.markerPosition.value,
-                      zoom: 15,
+                      zoom: 11,
                     ),
                     markers: controllerPickupAccept.markers.value,
                     polylines: {

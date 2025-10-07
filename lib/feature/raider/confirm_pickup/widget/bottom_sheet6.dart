@@ -24,6 +24,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
   @override
   void initState() {
     super.initState();
+
     String transportId = '';
 
     // 1. Try to get ID from the primary controller (ChooseTaxiApiController)

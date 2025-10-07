@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:naderhosn/core/services_class/data_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/shared_preference/shared_preferences_helper.dart';
 import '../service/chat_service.dart';
+import '../../../../core/network_caller/endpoints.dart';
 
 class ChatController extends GetxController {
   final WebSocketService webSocketService = WebSocketService();
@@ -20,6 +22,18 @@ class ChatController extends GetxController {
   var isOptionsVisible = false.obs;
   var isLoadingUserList = true.obs;
   var currentUserId = ''.obs;
+  var currentChatId = ''.obs;
+  var isPeerTyping = false.obs;
+
+  // reconnect
+  String? _lastSocketUrl;
+  String? _lastToken;
+  Timer? _reconnectTimer;
+  int _reconnectAttempt = 0;
+
+  // typing throttle
+  DateTime? _lastTypingSentAt;
+  Timer? _typingResetTimer;
 
   @override
   void onInit() async {
@@ -30,12 +44,14 @@ class ChatController extends GetxController {
   @override
   void onClose() {
     webSocketService.close();
+    _reconnectTimer?.cancel();
+    _typingResetTimer?.cancel();
     super.onClose();
   }
 
   Future<void> _initializeSocketConnection() async {
-    final token = await AuthController.accessToken;
-    final userId = await AuthController.getUserId();
+    final token = await SharedPreferencesHelper.getAccessToken();
+    final userId = await SharedPreferencesHelper.getUserId();
 
     if (kDebugMode) {
       print("Initializing WebSocket connection...");
@@ -55,13 +71,24 @@ class ChatController extends GetxController {
   }
 
   void _connectSocket(String url, String token) {
+    _lastSocketUrl = url;
+    _lastToken = token;
+
     webSocketService.connect(url, token);
-    webSocketService.messages.listen(_handleMessage, onDone: () {
-      if (kDebugMode) print("WebSocket closed");
-    });
+    webSocketService.messages.listen(
+      _handleMessage,
+      onDone: _onSocketClosed,
+      onError: (error, stack) {
+        if (kDebugMode) print("WebSocket error: $error");
+        _scheduleReconnect();
+      },
+    );
     // ✅ only fetch after connected
     Future.delayed(Duration(milliseconds: 500), () {
       fetchUserList();
+      if (currentChatId.value.isNotEmpty) {
+        fetchChats(currentChatId.value);
+      }
     });
   }
 
@@ -101,6 +128,10 @@ class ChatController extends GetxController {
           final joinedData = data['data'];
           chats.value = joinedData['messages'] ?? [];
           isLoadingChats.value = false;
+          break;
+
+        case "typing":
+          _handleTypingEvent(data['data']);
           break;
 
         default:
@@ -155,6 +186,7 @@ class ChatController extends GetxController {
 
   Future<void> fetchChats(String carTransportId) async {
     isLoadingChats.value = true;
+    currentChatId.value = carTransportId;
     webSocketService.sendMessage("joinChat", {
       "carTransportId": carTransportId,
     });
@@ -169,6 +201,8 @@ class ChatController extends GetxController {
     };
 
     webSocketService.sendMessage("Message", msgData);
+    // Stop typing indicator after sending
+    _sendTypingStopped(carTransportId);
   }
 
 
@@ -216,7 +250,7 @@ class ChatController extends GetxController {
   }
 
   Future<String?> _uploadImageToServer(String token) async {
-    final uri = Uri.parse('https://brother-taxi.onrender.com/api/v1/chats/upload-images');
+    final uri = Uri.parse('${Urls.baseUrl}/chats/upload-images');
     final request = http.MultipartRequest('POST', uri)
       ..headers['Authorization'] = token;
 
@@ -238,5 +272,60 @@ class ChatController extends GetxController {
       }
       return null;
     }
+  }
+
+  // Typing logic
+  void userTyping(String carTransportId) {
+    final now = DateTime.now();
+    if (_lastTypingSentAt == null || now.difference(_lastTypingSentAt!).inMilliseconds > 800) {
+      _lastTypingSentAt = now;
+      webSocketService.sendMessage("typing", {"carTransportId": carTransportId});
+    }
+    _typingResetTimer?.cancel();
+    _typingResetTimer = Timer(Duration(seconds: 3), () => _sendTypingStopped(carTransportId));
+  }
+
+  void _sendTypingStopped(String carTransportId) {
+    webSocketService.sendMessage("typingStopped", {"carTransportId": carTransportId});
+  }
+
+  void _handleTypingEvent(dynamic payload) {
+    if (payload == null) return;
+    final carTransportId = payload['carTransportId'] as String? ?? '';
+    final senderId = payload['senderId'] as String? ?? '';
+    if (carTransportId.isEmpty || senderId.isEmpty) return;
+    if (carTransportId != currentChatId.value) return;
+    if (senderId == currentUserId.value) return; // ignore self
+
+    isPeerTyping.value = true;
+    _typingResetTimer?.cancel();
+    _typingResetTimer = Timer(Duration(seconds: 3), () {
+      isPeerTyping.value = false;
+    });
+  }
+
+  void _onSocketClosed() {
+    if (kDebugMode) print("WebSocket closed");
+    _scheduleReconnect();
+  }
+
+  void _scheduleReconnect() {
+    if (_reconnectTimer?.isActive == true) return;
+    _reconnectAttempt += 1;
+    final delay = Duration(seconds: _backoffSeconds(_reconnectAttempt));
+    if (kDebugMode) print("Scheduling reconnect in ${delay.inSeconds}s (attempt $_reconnectAttempt)");
+    _reconnectTimer = Timer(delay, () async {
+      if (_lastSocketUrl != null && _lastToken != null) {
+        _connectSocket(_lastSocketUrl!, _lastToken!);
+      } else {
+        await _initializeSocketConnection();
+      }
+    });
+  }
+
+  int _backoffSeconds(int attempt) {
+    // 1,2,4,8,16 (cap 16)
+    final v = 1 << (attempt - 1);
+    return v > 16 ? 16 : v;
   }
 }

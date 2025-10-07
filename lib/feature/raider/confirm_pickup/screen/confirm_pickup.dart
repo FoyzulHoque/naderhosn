@@ -61,7 +61,7 @@ class ConfirmPickUpScreen extends StatelessWidget {
                 : GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: controller.pickupPosition.value ?? const LatLng(23.749341, 90.437213),
-                zoom: 15,
+                zoom: 11,
               ),
               markers: controller.markers.value,
               polylines: controller.polylines.value, // Show multiple polylines

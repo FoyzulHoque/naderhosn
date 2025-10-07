@@ -131,6 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Column(
         children: [
           Expanded(child: _buildMessageList()),
+          _buildTypingIndicator(),
           _buildOptionsPanel(),
           _buildMessageInput(),
         ],
@@ -241,6 +242,13 @@ class _ChatScreenState extends State<ChatScreen> {
         controller: _messageController,
         maxLines: null,
         minLines: 1,
+        onChanged: (_) {
+          if (chatController.currentChatId.value.isNotEmpty) {
+            chatController.userTyping(chatController.currentChatId.value);
+          } else {
+            chatController.userTyping(widget.carTransportId);
+          }
+        },
         decoration: InputDecoration(
           filled: true,
           fillColor: AppConstants.whiteColor,
@@ -313,6 +321,28 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  Widget _buildTypingIndicator() {
+    return Obx(() {
+      if (!chatController.isPeerTyping.value) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 6.0),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(width: 6),
+              Text(
+                'typing…',
+                style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
 }
 
 class _MessageBubble extends StatelessWidget {
@@ -336,9 +366,6 @@ class _MessageBubble extends StatelessWidget {
           final isMine = chat['senderId'] == userId;
 
 
-          print("User ID============================: $userId");
-          print("Sender ID============================: $chat['senderId']");
-
           return Align(
             alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
@@ -358,6 +385,7 @@ class _MessageBubble extends StatelessWidget {
                     _MessageImage(imageUrl: chat['images'][0]),
                   if (chat['message'] != null && chat['message'].isNotEmpty)
                     _MessageText(message: chat['message']!, isMine: isMine),
+                  _MessageTimestamp(createdAt: chat['createdAt']),
                 ],
               ),
             ),
@@ -449,5 +477,42 @@ class _OptionsPanel extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _MessageTimestamp extends StatelessWidget {
+  final dynamic createdAt;
+
+  const _MessageTimestamp({required this.createdAt});
+
+  @override
+  Widget build(BuildContext context) {
+    final String label = _format(createdAt);
+    return Padding(
+      padding: const EdgeInsets.only(top: 6.0),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 11, color: Colors.grey),
+      ),
+    );
+  }
+
+  String _format(dynamic value) {
+    try {
+      if (value is String && value.isNotEmpty) {
+        final dt = DateTime.tryParse(value);
+        if (dt != null) return _hhmm(dt);
+      }
+      return '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String _hhmm(DateTime dt) {
+    final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final m = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$h:$m $ampm';
   }
 }

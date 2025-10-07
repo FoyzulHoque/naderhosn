@@ -6,6 +6,7 @@ import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup
 
 import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
 import '../../choose_taxi/controler/choose_taxi_api_controller.dart';
+import '../controler/my_ride_pending_api_controller.dart';
 import '../controler/ride_cancel_api_controller.dart';
 
 class ExpandedBottomSheet4 extends StatefulWidget {
@@ -19,30 +20,33 @@ class _ExpandedBottomSheet4State extends State<ExpandedBottomSheet4> {
   String transportId = '';
 
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());
-
   final RideCancelApiController rideCancelApiController = Get.put(RideCancelApiController());
-  final ChooseTaxiApiController apiController = Get.find<ChooseTaxiApiController>();
+  final MyRidePendingApiController apiController = Get.put(MyRidePendingApiController());
 
   @override
   void initState() {
     super.initState();
+    // Trigger API call and log execution
+    Future.microtask(() async {
+      debugPrint("-----ExpandedBottomSheet4 initState: Triggering myRidePendingApiController");
+      await apiController.myRidePendingApiController();
+      debugPrint("-----ExpandedBottomSheet4 initState: myRidePendingApiController completed, carTransportModel length: ${apiController.carTransportModel.length}");
+    });
 
     // 1. PRIORITY: Get ID from ConfirmPickupController (post-ride creation)
     if (controller.carTransportId.value != null && controller.carTransportId.value!.isNotEmpty) {
       transportId = controller.carTransportId.value!;
-      debugPrint("ExpandedBottomSheet4 initState: Using ID from ConfirmPickupController: $transportId");
+      debugPrint("-----ExpandedBottomSheet4 initState: Using ID from ConfirmPickupController: $transportId");
     } else {
-      // Fallback: Try ChooseTaxiApiController
-      if (apiController.rideDataList.isNotEmpty &&
-          apiController.rideDataList[0].carTransport != null &&
-          apiController.rideDataList[0].carTransport!.isNotEmpty) {
-        transportId = apiController.rideDataList[0].carTransport![0].id ?? '';
-        debugPrint("ExpandedBottomSheet4 initState: Fallback to ChooseTaxiApiController ID: $transportId");
+      // Fallback: Try MyRidePendingApiController
+      if (apiController.carTransportModel.isNotEmpty) {
+        transportId = apiController.carTransportModel[0].id ?? '';
+        debugPrint("--+++--ExpandedBottomSheet4 initState: Fallback to MyRidePendingApiController ID: $transportId");
       } else {
         // Final fallback: Get.arguments
         final args = Get.arguments as Map<String, dynamic>? ?? {};
         transportId = args['transportId']?.toString() ?? '';
-        debugPrint("ExpandedBottomSheet4 initState: Fallback to arguments ID: $transportId");
+        debugPrint("--**-ExpandedBottomSheet4 initState: Fallback to arguments ID: $transportId");
       }
     }
   }
@@ -110,14 +114,25 @@ class _ExpandedBottomSheet4State extends State<ExpandedBottomSheet4> {
                 SizedBox(height: 10),
                 Divider(),
                 SizedBox(height: 10),
-                Text(
+                // Add reactivity to show loading or error state
+                Obx(() => apiController.isLoading.value
+                    ? Center(child: CircularProgressIndicator())
+                    : apiController.errorMessage.value.isNotEmpty
+                    ? Text(
+                  "Error: ${apiController.errorMessage.value}",
+                  style: globalTextStyle(
+                    fontSize: 16,
+                    color: Colors.red,
+                  ),
+                )
+                    : Text(
                   "Why do you want to cancel? ",
                   style: globalTextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
-                ),
+                )),
                 SizedBox(height: 10),
 
                 // --- Cancellation Reasons List (using a helper function) ---
@@ -212,11 +227,14 @@ class _ExpandedBottomSheet4State extends State<ExpandedBottomSheet4> {
       transportId = controller.carTransportId.value!;
       debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: Using ID from ConfirmPickupController: $transportId");
     } else {
-      if (apiController.rideDataList.isNotEmpty &&
-          apiController.rideDataList[0].carTransport != null &&
-          apiController.rideDataList[0].carTransport!.isNotEmpty) {
-        transportId = apiController.rideDataList[0].carTransport![0].id ?? '';
-        debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: Fallback to ChooseTaxiApiController ID: $transportId");
+      // Retry API call if carTransportModel is empty
+      if (apiController.carTransportModel.isEmpty) {
+        debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: carTransportModel empty, retrying API call");
+        await apiController.myRidePendingApiController();
+      }
+      if (apiController.carTransportModel.isNotEmpty) {
+        transportId = apiController.carTransportModel[0].id ?? '';
+        debugPrint("ExpandedBottomSheet4 _rideCancelledMethod: Fallback to MyRidePendingApiController ID: $transportId");
       } else {
         final args = Get.arguments as Map<String, dynamic>? ?? {};
         transportId = args['transportId']?.toString() ?? '';
