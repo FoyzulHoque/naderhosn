@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../../../../core/network_caller/endpoints.dart';
 import '../../../../core/network_caller/network_config.dart';
 import '../model/rider_driver_info_model.dart';
-import 'dart:convert';
 
 class DriverInfoApiController extends GetxController {
   var isLoading = false.obs;

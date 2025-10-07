@@ -2,7 +2,6 @@ import 'package:get/get.dart';
 import 'package:naderhosn/core/network_caller/network_config.dart';
 import 'package:naderhosn/core/services_class/data_helper.dart';
 import '../../../../core/network_caller/endpoints.dart';
-import '../../choose_taxi/model/choose_taxi_model.dart';
 import '../model/panding_model.dart';
 
 class MyRidePendingApiController extends GetxController {
