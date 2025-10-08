@@ -5,15 +5,18 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:naderhosn/core/network_caller/endpoints.dart';
 import 'dart:convert';
-
-import '../../../../core/network_caller/endpoints.dart';
 import '../../../../core/services_class/data_helper.dart';
+import '../../../friends/service/chat_service.dart'; // Keep if needed for other functionality
 import '../../confirm_pickup/controler/driver_infor_api_controller.dart';
 
 class PickupAcceptController extends GetxController {
-  final DriverInfoApiController driverInfoApiController = Get.put(DriverInfoApiController());
-  final String googleApiKey = '${Urls.googleApiKey}'; // Replace with actual key or load from config
+  final DriverInfoApiController driverInfoApiController =
+  Get.put(DriverInfoApiController());
+  final String googleApiKey = Urls.googleApiKey;
+  // FIX: Use Get.find() to retrieve the singleton instance, not create a new one.
+  final WebSocketService webSocketService = Get.find<WebSocketService>();
 
   // Observable state
   var isBottomSheetOpen = false.obs;
@@ -44,6 +47,15 @@ class PickupAcceptController extends GetxController {
     super.onInit();
     await _loadCustomMarkers();
     _fetchAndLoadData();
+    // Subscribe to WebSocket driver location updates
+    webSocketService.addLocationUpdateCallback(addMarkerCarAvailable);
+  }
+
+  @override
+  void onClose() {
+    webSocketService.removeLocationUpdateCallback(addMarkerCarAvailable);
+    webSocketService.close(); // Note: Closing the service might affect other active controllers
+    super.onClose();
   }
 
   // Unified method to load custom markers
@@ -115,7 +127,8 @@ class PickupAcceptController extends GetxController {
       image.width,
       image.height + textPainter.height.toInt() + 8,
     );
-    final finalByteData = await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    final finalByteData =
+    await finalImage.toByteData(format: ui.ImageByteFormat.png);
     target.value = BitmapDescriptor.fromBytes(finalByteData!.buffer.asUint8List());
   }
 
@@ -128,6 +141,9 @@ class PickupAcceptController extends GetxController {
       }
       _transportId = fetchedId;
       debugPrint('Auth User ID fetched: $_transportId');
+
+      // Set transport ID in WebSocketService
+      webSocketService.setTransportId(_transportId);
 
       await driverInfoApiController.driverInfoApiMethod(_transportId!);
       _configureMapMarkers();
@@ -168,7 +184,8 @@ class PickupAcceptController extends GetxController {
   // Fetch route using Google Directions API
   Future<void> _fetchRoute() async {
     final origin = '${markerPosition.value.latitude},${markerPosition.value.longitude}';
-    final destination = '${destinationPosition.value.latitude},${destinationPosition.value.longitude}';
+    final destination =
+        '${destinationPosition.value.latitude},${destinationPosition.value.longitude}';
     final url = 'https://maps.googleapis.com/maps/api/directions/json?'
         'origin=$origin&destination=$destination&key=$googleApiKey';
 
@@ -245,6 +262,10 @@ class PickupAcceptController extends GetxController {
   }
 
   void addMarkerCarAvailable(LatLng position, String label) {
+    markers.removeWhere(
+            (marker) =>
+        marker.markerId.value == 'Driver' ||
+            marker.markerId.value.startsWith('Driver ('));
     markers.add(Marker(
       markerId: MarkerId(label),
       position: position,
@@ -268,6 +289,7 @@ class PickupAcceptController extends GetxController {
       color: Colors.blue,
       width: 5,
     );
-    debugPrint('🗑️ Driver info cleared and state reset.');
+    webSocketService.close();
+    debugPrint('🗑️ Driver info cleared and WebSocket closed.');
   }
 }
