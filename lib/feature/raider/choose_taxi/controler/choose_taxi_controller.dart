@@ -266,7 +266,7 @@ class ChooseTaxiController extends GetxController {
         targetSize = 100;
         break;
       case MarkerType.dropOff:
-        imagePath = 'assets/images/driver_location.png';
+        imagePath = 'assets/icons/locations.png';
         targetSize = 100;
         break;
       case MarkerType.car:

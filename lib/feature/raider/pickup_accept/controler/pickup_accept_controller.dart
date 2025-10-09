@@ -1,51 +1,163 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:naderhosn/core/network_caller/endpoints.dart';
+import 'dart:convert';
+import '../../../../core/services_class/data_helper.dart';
+import '../../../web socket/map_web_socket.dart';
 import '../../confirm_pickup/controler/driver_infor_api_controller.dart';
 
 class PickupAcceptController extends GetxController {
+  final DriverInfoApiController driverInfoApiController =
+  Get.put(DriverInfoApiController());
+  final String googleApiKey = Urls.googleApiKey;
+  // FIX: Use Get.find() to retrieve the singleton instance, not create a new one.
+  final MapWebSocketService webSocketService = Get.find<MapWebSocketService>();
+
+  // Observable state
   var isBottomSheetOpen = false.obs;
   var isLoading = false.obs;
-  var markerPosition = LatLng(23.749341, 90.437213).obs; // Initial fallback (Pickup)
-  var destinationPosition = LatLng(23.749704, 90.430164).obs; // Initial fallback (Dropoff)
+  var markerPosition = LatLng(23.749341, 90.437213).obs; // Fallback pickup
+  var destinationPosition = LatLng(23.749704, 90.430164).obs; // Fallback drop-off
   var customMarkerIcon = BitmapDescriptor.defaultMarker.obs;
   var customMarkerIconDriver = BitmapDescriptor.defaultMarker.obs;
   var customMarkerCar = BitmapDescriptor.defaultMarker.obs;
   var markers = <Marker>{}.obs;
   var polyline = Polyline(
-    polylineId: PolylineId("line_1"),
+    polylineId: PolylineId("route"),
     points: <LatLng>[],
     color: Colors.blue,
     width: 5,
   ).obs;
 
-  // Time-related variables from API
+  // Time-related variables
   var pickupDate = ''.obs;
   var pickupTime = ''.obs;
   var rideTime = 0.obs;
   var waitingTime = 0.obs;
 
-  final DriverInfoApiController apiController = Get.put(DriverInfoApiController());
+  String? _transportId;
 
   @override
   void onInit() async {
     super.onInit();
+    await _loadCustomMarkers();
+    _fetchAndLoadData();
+    // Subscribe to WebSocket driver location updates
+    webSocketService.addLocationUpdateCallback(addMarkerCarAvailable);
+  }
 
-    // Assume id is passed via Get.arguments when navigating to this screen
-    final String? id = Get.arguments as String?;
+  @override
+  void onClose() {
+    webSocketService.removeLocationUpdateCallback(addMarkerCarAvailable);
+    webSocketService.close(); // Note: Closing the service might affect other active controllers
+    super.onClose();
+  }
 
-    if (id != null) {
-      await apiController.driverInfoApiMethod(id);
+  // Unified method to load custom markers
+  Future<void> _loadCustomMarkers() async {
+    isLoading.value = true;
+    try {
+      await Future.wait([
+        _loadCustomMarker(
+          asset: 'assets/images/my_location.png',
+          label: 'Pickup',
+          width: 100,
+          target: customMarkerIcon,
+        ),
+        _loadCustomMarker(
+          asset: 'assets/images/driver_location.png',
+          label: 'Driver',
+          width: 80,
+          target: customMarkerIconDriver,
+        ),
+        _loadCustomMarker(
+          asset: 'assets/images/car.png',
+          label: 'Dropoff',
+          width: 60,
+          target: customMarkerCar,
+        ),
+      ]);
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load custom markers: $e');
+    } finally {
+      isLoading.value = false;
     }
+  }
 
-    final ride = apiController.rideData.value;
+  Future<void> _loadCustomMarker({
+    required String asset,
+    required String label,
+    required int width,
+    required Rx<BitmapDescriptor> target,
+  }) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+
+    final data = await rootBundle.load(asset);
+    final bytes = data.buffer.asUint8List();
+    final codec = await ui.instantiateImageCodec(bytes, targetWidth: width);
+    final frame = await codec.getNextFrame();
+    final image = frame.image;
+
+    final paint = Paint();
+    canvas.drawImage(image, Offset(0, 0), paint);
+
+    final textPainter = TextPainter(textDirection: TextDirection.ltr)
+      ..text = TextSpan(
+        text: label,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          backgroundColor: Colors.yellow,
+        ),
+      )
+      ..layout();
+
+    final textX = (image.width - textPainter.width) / 2;
+    final textY = image.height.toDouble() + 4;
+    textPainter.paint(canvas, Offset(textX, textY));
+
+    final finalImage = await pictureRecorder.endRecording().toImage(
+      image.width,
+      image.height + textPainter.height.toInt() + 8,
+    );
+    final finalByteData =
+    await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    target.value = BitmapDescriptor.fromBytes(finalByteData!.buffer.asUint8List());
+  }
+
+  void _fetchAndLoadData() async {
+    try {
+      final fetchedId = await AuthController.getUserId();
+      if (fetchedId == null || fetchedId.isEmpty) {
+        Get.snackbar('Error', 'Failed to fetch user ID.');
+        return;
+      }
+      _transportId = fetchedId;
+      debugPrint('Auth User ID fetched: $_transportId');
+
+      // Set transport ID in WebSocketService
+      webSocketService.setTransportId(_transportId);
+
+      await driverInfoApiController.driverInfoApiMethod(_transportId!);
+      _configureMapMarkers();
+      await _fetchRoute();
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load data: $e');
+    }
+  }
+
+  void _configureMapMarkers() {
+    final ride = driverInfoApiController.rideData.value;
+    markers.clear();
+
     if (ride != null) {
-      // Set dynamic positions from API, fallback to static if null
       markerPosition.value = LatLng(
         ride.pickupLat ?? 23.749341,
         ride.pickupLng ?? 90.437213,
@@ -55,225 +167,129 @@ class PickupAcceptController extends GetxController {
         ride.dropOffLng ?? 90.430164,
       );
 
-      // Add driver marker if available
       if (ride.driverLat != null && ride.driverLng != null) {
-        addMarkerCarAvailable(
-          LatLng(ride.driverLat!, ride.driverLng!),
-          'Driver',
-        );
+        addMarkerCarAvailable(LatLng(ride.driverLat!, ride.driverLng!), 'Driver');
       }
 
-      // Set time-related data from API
       pickupDate.value = ride.pickupDate ?? '';
       pickupTime.value = ride.pickupTime ?? '';
       rideTime.value = ride.rideTime ?? 0;
       waitingTime.value = ride.waitingTime ?? 0;
+
+      addMarker(markerPosition.value, 'Pickup');
+      addMarkerDriver(destinationPosition.value, 'Dropoff');
     }
-
-    // Load custom markers with appropriate labels
-    await _loadCustomMarker("Pickup");
-    await _loadCustomMarker2("Driver");
-    await _loadCustomMarkerCar("Dropoff");
-
-    addMarker(markerPosition.value, 'Pickup');
-    addMarkerDriver(destinationPosition.value, 'Dropoff');
   }
 
-  // Toggle bottom sheet visibility
-  void toggleBottomSheet() {
-    isBottomSheetOpen.value = !isBottomSheetOpen.value;
+  // Fetch route using Google Directions API
+  Future<void> _fetchRoute() async {
+    final origin = '${markerPosition.value.latitude},${markerPosition.value.longitude}';
+    final destination =
+        '${destinationPosition.value.latitude},${destinationPosition.value.longitude}';
+    final url = 'https://maps.googleapis.com/maps/api/directions/json?'
+        'origin=$origin&destination=$destination&key=$googleApiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'OK') {
+          final points = _decodePolyline(data['routes'][0]['overview_polyline']['points']);
+          polyline.value = Polyline(
+            polylineId: PolylineId('route'),
+            points: points,
+            color: Colors.amber,
+            width: 5,
+          );
+        } else {
+          Get.snackbar('Error', 'Failed to fetch route: ${data['status']}');
+        }
+      } else {
+        Get.snackbar('Error', 'Failed to fetch route: HTTP ${response.statusCode}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch route: $e');
+    }
   }
 
-  void addMarkerCarAvailable(LatLng position, String label) {
-    final marker = Marker(
-      markerId: MarkerId(label),
-      position: position,
-      infoWindow: InfoWindow(title: label),
-      icon: customMarkerCar.value,
-    );
-    markers.add(marker);
+  // Decode polyline points from Google Directions API
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(LatLng(lat / 1e5, lng / 1e5));
+    }
+    return points;
   }
 
   void addMarker(LatLng position, String label) {
-    final marker = Marker(
+    markers.add(Marker(
       markerId: MarkerId(label),
       position: position,
       infoWindow: InfoWindow(title: label),
       icon: customMarkerIcon.value,
-    );
-    markers.add(marker);
+    ));
   }
 
   void addMarkerDriver(LatLng position, String label) {
-    final marker = Marker(
+    markers.add(Marker(
       markerId: MarkerId(label),
       position: position,
       infoWindow: InfoWindow(title: label),
       icon: customMarkerCar.value,
-    );
-    markers.add(marker);
-    updatePolyline();
+    ));
   }
 
-  void updatePolyline() {
-    List<LatLng> points = [markerPosition.value, destinationPosition.value];
+  void addMarkerCarAvailable(LatLng position, String label) {
+    markers.removeWhere(
+            (marker) =>
+        marker.markerId.value == 'Driver' ||
+            marker.markerId.value.startsWith('Driver ('));
+    markers.add(Marker(
+      markerId: MarkerId(label),
+      position: position,
+      infoWindow: InfoWindow(title: label),
+      icon: customMarkerIconDriver.value,
+    ));
+  }
 
+  void toggleBottomSheet() {
+    isBottomSheetOpen.value = !isBottomSheetOpen.value;
+  }
+
+  void clearDriverInfo() {
+    driverInfoApiController.rideData.value = null;
+    driverInfoApiController.isLoading.value = false;
+    _transportId = null;
+    markers.clear();
     polyline.value = Polyline(
-      polylineId: PolylineId("line_1"),
-      points: points,
+      polylineId: PolylineId('route'),
+      points: [],
       color: Colors.blue,
       width: 5,
     );
-  }
-
-  // Load custom marker with label
-  Future<void> _loadCustomMarker(String label) async {
-    isLoading.value = true;
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-
-    final ByteData data = await rootBundle.load(
-      'assets/images/my_location.png',
-    );
-    final Uint8List bytes = data.buffer.asUint8List();
-
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      bytes,
-      targetWidth: 200,
-    );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    final ui.Image image = fi.image;
-
-    Paint paint = Paint();
-    canvas.drawImage(image, Offset(0, 0), paint);
-
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    textPainter.text = TextSpan(
-      text: label,
-      style: const TextStyle(
-        fontSize: 20,
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        backgroundColor: Colors.yellow,
-      ),
-    );
-
-    textPainter.layout();
-
-    final double textX = (image.width - textPainter.width) / 2;
-    final double textY = image.height.toDouble() + 4;
-
-    textPainter.paint(canvas, Offset(textX, textY));
-
-    final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
-      image.width,
-      image.height + textPainter.height.toInt() + 8,
-    );
-
-    final ByteData? finalByteData = await finalImage.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    final Uint8List finalBytes = finalByteData!.buffer.asUint8List();
-
-    customMarkerIcon.value = BitmapDescriptor.fromBytes(finalBytes);
-  }
-
-  Future<void> _loadCustomMarker2(String label) async {
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-
-    final ByteData data = await rootBundle.load(
-      'assets/images/driver_location.png',
-    );
-    final Uint8List bytes = data.buffer.asUint8List();
-
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      bytes,
-      targetWidth: 100,
-    );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    final ui.Image image = fi.image;
-
-    Paint paint = Paint();
-    canvas.drawImage(image, Offset(0, 0), paint);
-
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    textPainter.text = TextSpan(
-      text: label,
-      style: const TextStyle(
-        fontSize: 20,
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        backgroundColor: Colors.yellow,
-      ),
-    );
-
-    textPainter.layout();
-
-    final double textX = (image.width - textPainter.width) / 2;
-    final double textY = image.height.toDouble() + 4;
-
-    textPainter.paint(canvas, Offset(textX, textY));
-
-    final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
-      image.width,
-      image.height + textPainter.height.toInt() + 8,
-    );
-
-    final ByteData? finalByteData = await finalImage.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    final Uint8List finalBytes = finalByteData!.buffer.asUint8List();
-
-    customMarkerIconDriver.value = BitmapDescriptor.fromBytes(finalBytes);
-  }
-
-  Future<void> _loadCustomMarkerCar(String label) async {
-    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(pictureRecorder);
-
-    final ByteData data = await rootBundle.load('assets/images/car.png');
-    final Uint8List bytes = data.buffer.asUint8List();
-
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      bytes,
-      targetWidth: 70,
-    );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    final ui.Image image = fi.image;
-
-    Paint paint = Paint();
-    canvas.drawImage(image, Offset(0, 0), paint);
-
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
-    textPainter.text = TextSpan(
-      text: label,
-      style: const TextStyle(
-        fontSize: 20,
-        color: Colors.black,
-        fontWeight: FontWeight.bold,
-        backgroundColor: Colors.yellow,
-      ),
-    );
-
-    textPainter.layout();
-
-    final double textX = (image.width - textPainter.width) / 2;
-    final double textY = image.height.toDouble() + 4;
-
-    textPainter.paint(canvas, Offset(textX, textY));
-
-    final ui.Image finalImage = await pictureRecorder.endRecording().toImage(
-      image.width,
-      image.height + textPainter.height.toInt() + 8,
-    );
-
-    final ByteData? finalByteData = await finalImage.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    final Uint8List finalBytes = finalByteData!.buffer.asUint8List();
-
-    customMarkerCar.value = BitmapDescriptor.fromBytes(finalBytes);
-    isLoading.value = false;
+    webSocketService.close();
+    debugPrint('🗑️ Driver info cleared and WebSocket closed.');
   }
 }

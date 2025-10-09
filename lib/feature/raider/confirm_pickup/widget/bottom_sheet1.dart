@@ -7,17 +7,19 @@ import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup_controller.dart';
 
 import '../controler/confirm_pick_up_api_controller.dart';
+import '../controler/my_ride_pending_api_controller.dart';
 
-class ExpandedBottomSheet1 extends StatelessWidget {
+class ExpandedBottomSheet1 extends StatefulWidget {
   ExpandedBottomSheet1({super.key});
 
+  @override
+  State<ExpandedBottomSheet1> createState() => _ExpandedBottomSheet1State();
+}
+
+class _ExpandedBottomSheet1State extends State<ExpandedBottomSheet1> {
   final ConfirmPickupController uiController = Get.put(ConfirmPickupController());
   final ConfirmPickUpApiController apiController = Get.put(ConfirmPickUpApiController());
-
-  // --- Utility Methods to get Current Date/Time ---
-
-  // Date in YYYY-MM-DD format (e.g., 2025-10-02)
-  String getCurrentDate() {
+String getCurrentDate() {
     return DateTime.now().toIso8601String().substring(0, 10);
   }
 
@@ -26,8 +28,13 @@ class ExpandedBottomSheet1 extends StatelessWidget {
     return DateTime.now().toString().substring(11, 16);
   }
 
+@override
+  void initState() {
+    // TODO: implement initState
+  uiController;
+    super.initState();
+  }
   // --------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     // Retrieve arguments passed to this bottom sheet
@@ -133,9 +140,9 @@ class ExpandedBottomSheet1 extends StatelessWidget {
                     onPress: () async {
                       // --- Get Current Date and Time for the API Call ---
                       final String pickupDate = getCurrentDate(); // Now correctly derived
-                      final String pickupTime = getCurrentTime(); // Now correctly derived
+                      final String pickupTime = getCurrentTime();
+                      //await myRidePendingApiController.myRidePendingApiController();// Now correctly derived
                       // ----------------------------------------------------
-
                       print("ExpandedBottomSheet1: 'Confirm Pick-up' button pressed.");
                       print("ExpandedBottomSheet1: Data for API call -> ridePlanId: '$ridePlanId', selectedDriverId: '$selectedDriverId', pickupTime: '$pickupTime', pickupDate: '$pickupDate', selectedVehicleId: '$selectedVehicleId'");
 
