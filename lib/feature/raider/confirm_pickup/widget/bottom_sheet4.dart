@@ -4,9 +4,7 @@ import 'package:get/Get.dart';
 import 'package:naderhosn/core/global_widegts/custom_button.dart';
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/controler/confirm_pickup_controller.dart';
-
 import '../../../bottom_nav_user/screen/bottom_nav_user.dart';
-import '../../choose_taxi/controler/choose_taxi_api_controller.dart';
 import '../controler/my_ride_pending_api_controller.dart';
 import '../controler/ride_cancel_api_controller.dart';
 

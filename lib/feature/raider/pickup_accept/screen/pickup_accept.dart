@@ -32,6 +32,22 @@ class PickupAcceptScreen extends StatelessWidget {
                 controllerPickupAccept.polyline.value,
               },
             );
+
+                    child: CircularProgressIndicator(),
+                  ) // Added Center for better display
+                : GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      // Use the observable position
+                      target: controllerPickupAccept.markerPosition.value,
+                      zoom: 11,
+                    ),
+                    // Use the observable set of markers
+                    markers: controllerPickupAccept.markers.value,
+                    polylines: {
+                      // Use the observable polyline
+                      controllerPickupAccept.polyline.value,
+                    },
+                  );
           }),
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 60),

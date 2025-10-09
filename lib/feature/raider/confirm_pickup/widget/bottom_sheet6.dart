@@ -19,7 +19,10 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
   // 1. Controller Initializations
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());
   final DriverInfoApiController driverInfoApiController = Get.put(DriverInfoApiController());
+
    //final MyRidePendingApiController myRidePendingApiController=Get.find<MyRidePendingApiController>();
+
+
   // NOTE: ChooseTaxiApiController removed from here.
 
   String transportId = ''; // State variable to hold the ID (Car Transport ID or Rider ID)
@@ -37,6 +40,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
   void initState() {
     super.initState();
     debugPrint("🚗 ExpandedBottomSheet6 initState started...");
+
     controller;
     // myRidePendingApiController.myRidePendingApiController();
     // Start the process of finding the ID and fetching data
@@ -49,6 +53,20 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
 
     // 1. Get ID from AuthController
     fetchedId = await AuthController.getUserId();
+
+=======
+
+    // Start the process of finding the ID and fetching data
+    _fetchAndLoadData();
+  }
+
+  // Consolidated async method to fetch ID from AuthController and call API safely
+  void _fetchAndLoadData() async {
+    String? fetchedId;
+
+    // 1. Get ID from AuthController
+    fetchedId = await AuthController.getUserId();
+
 
     if (fetchedId != null && fetchedId.isNotEmpty) {
       transportId = fetchedId; // Update the state variable (used for the initial null check in build)
