@@ -1,13 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService {
   late WebSocketChannel _channel;
 
-  void connect(String url, String token) {
-    _channel = WebSocketChannel.connect(Uri.parse(url));
+  Future<void> connect(String url, String token) async {
+    _channel = WebSocketChannel.connect(Uri.parse('$url?token=$token'));
+    await _channel.ready;
     _authenticate(token);
   }
 

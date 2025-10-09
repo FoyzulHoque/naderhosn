@@ -1,17 +1,12 @@
-// driver_infor_api_controller.dart
 import 'package:get/get.dart';
 import '../../../../core/network_caller/endpoints.dart';
 import '../../../../core/network_caller/network_config.dart';
 import '../../confirm_pickup/model/rider_driver_info_model.dart';
-import 'dart:convert';
 
 class RideCompleteApiController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
   var rideData = Rx<RiderDriverInfoModel?>(null);
-
-
-
 
   Future<void> redeConpleteApiMethod(String id) async {
     print("Calling driverInfoApiMethod with transportId: $id");

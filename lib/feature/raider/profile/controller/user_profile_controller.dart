@@ -4,7 +4,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import '../../../../core/network_caller/network_config.dart';
 import '../../../../core/network_path/natwork_path.dart';
 import '../../../../core/services_class/shared_preferences_helper.dart';
-import '../model/user_profile_model.dart';
 
 class UserProfileController extends GetxController {
   var isLoading = false.obs;

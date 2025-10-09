@@ -138,7 +138,7 @@ class ExpandedBottomSheet2 extends StatelessWidget {
                             ),
                             SizedBox(height: 5),
                             Text(
-                              "Meet at the pick-up point for Rode No.12, North",
+                              "Meet at the pick-up point",
                               style: globalTextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

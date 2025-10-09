@@ -19,6 +19,7 @@ class MyRidePendingApiController extends GetxController {
         carTransportModel.value =
             data.map((json) => CarTransportModel.fromJson(json)).toList(); // Assign parsed list
         await AuthController.accessToken;
+        AuthController.saveUserId(carTransportModel[0].id!);
         errorMessage.value = '';
       } else {
         errorMessage.value = response.errorMessage ?? 'Unknown error';

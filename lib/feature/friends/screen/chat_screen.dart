@@ -6,6 +6,7 @@ import '../../../core/shared_preference/shared_preferences_helper.dart';
 import '../controller/chat_controller.dart';
 import '../../../core/style/global_text_style.dart';
 import 'app_constants.dart';
+import '../../../core/services_class/data_helper.dart';
 
 class ChatScreen extends StatefulWidget {
   final String carTransportId;
@@ -31,8 +32,12 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    chatController.fetchChats(widget.carTransportId);
-
+    // Fetch chats only when WebSocket is connected
+    ever(chatController.isSocketConnected, (isConnected) {
+      if (isConnected) {
+        chatController.fetchChats(widget.carTransportId);
+      }
+    });
 
     ever(chatController.chats, (_) {
       if (scrollController.hasClients) {
@@ -43,8 +48,14 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       }
     });
+  }
 
-
+  @override
+  void dispose() {
+    AuthController.idClear(); // Clear carTransportId when chat screen closes
+    _messageController.dispose();
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -236,23 +247,26 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildMessageTextField() {
-    return ConstrainedBox(
+    return Obx(() => ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 150),
       child: TextField(
         controller: _messageController,
         maxLines: null,
         minLines: 1,
+        enabled: chatController.isSocketConnected.value,
         onChanged: (_) {
-          if (chatController.currentChatId.value.isNotEmpty) {
-            chatController.userTyping(chatController.currentChatId.value);
-          } else {
-            chatController.userTyping(widget.carTransportId);
+          if (chatController.isSocketConnected.value) {
+            if (chatController.currentChatId.value.isNotEmpty) {
+              chatController.userTyping(chatController.currentChatId.value);
+            } else {
+              chatController.userTyping(widget.carTransportId);
+            }
           }
         },
         decoration: InputDecoration(
           filled: true,
           fillColor: AppConstants.whiteColor,
-          hintText: "Your message",
+          hintText: chatController.isSocketConnected.value ? "Your message" : "Connecting...",
           hintStyle: TextStyle(
             color: AppConstants.blackColor.withOpacity(0.4),
           ),
@@ -263,7 +277,7 @@ class _ChatScreenState extends State<ChatScreen> {
           focusedBorder: _buildInputBorder(),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildOptionsButton() {
@@ -274,10 +288,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildSendButton() {
-    return IconButton(
+    return Obx(() => IconButton(
       icon: const Icon(Icons.send, color: AppConstants.blueAccent),
-      onPressed: _sendMessage,
-    );
+      onPressed: chatController.isSocketConnected.value ? _sendMessage : null,
+    ));
   }
 
   InputBorder _buildInputBorder() {
@@ -296,9 +310,13 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }
 
+    if (!chatController.isSocketConnected.value) {
+      Get.snackbar("Error", "Cannot send message: No WebSocket connection.");
+      return;
+    }
+
     if (selectedImage.isNotEmpty) {
       chatController.uploadImage(widget.carTransportId, message);
-      // chatController.selectedImagePath.value = "";
     } else {
       chatController.sendMessage(widget.carTransportId, message);
     }
@@ -354,43 +372,38 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String?>(
-
-        future: SharedPreferencesHelper.getUserId(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-
-          final userId = snapshot.data ?? '';
-
-          final isMine = chat['senderId'] == userId;
-
-
-          return Align(
-            alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isMine ? AppConstants.whiteColor : const Color(
-                    0xFF252525),
-                borderRadius: _getBorderRadius(isMine),
-              ),
-              child: Column(
-                crossAxisAlignment: isMine
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
-                children: [
-                  if (chat['images'] != null && chat['images'].isNotEmpty)
-                    _MessageImage(imageUrl: chat['images'][0]),
-                  if (chat['message'] != null && chat['message'].isNotEmpty)
-                    _MessageText(message: chat['message']!, isMine: isMine),
-                  _MessageTimestamp(createdAt: chat['createdAt']),
-                ],
-              ),
-            ),
-          );
+      future: SharedPreferencesHelper.getUserId(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
         }
+
+        final userId = snapshot.data ?? '';
+
+        final isMine = chat['senderId'] == userId;
+
+        return Align(
+          alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isMine ? AppConstants.whiteColor : const Color(0xFF252525),
+              borderRadius: _getBorderRadius(isMine),
+            ),
+            child: Column(
+              crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                if (chat['images'] != null && chat['images'].isNotEmpty)
+                  _MessageImage(imageUrl: chat['images'][0]),
+                if (chat['message'] != null && chat['message'].isNotEmpty)
+                  _MessageText(message: chat['message']!, isMine: isMine),
+                _MessageTimestamp(createdAt: chat['createdAt']),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

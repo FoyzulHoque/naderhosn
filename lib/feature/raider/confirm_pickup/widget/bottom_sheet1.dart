@@ -19,7 +19,9 @@ class ExpandedBottomSheet1 extends StatefulWidget {
 class _ExpandedBottomSheet1State extends State<ExpandedBottomSheet1> {
   final ConfirmPickupController uiController = Get.put(ConfirmPickupController());
   final ConfirmPickUpApiController apiController = Get.put(ConfirmPickUpApiController());
-String getCurrentDate() {
+  final MyRidePendingApiController myRidePendingApiController = Get.put(MyRidePendingApiController());
+
+  String getCurrentDate() {
     return DateTime.now().toIso8601String().substring(0, 10);
   }
 
@@ -28,10 +30,29 @@ String getCurrentDate() {
     return DateTime.now().toString().substring(11, 16);
   }
 
+
+  // Consolidated async method to fetch ID and call APIs in sequence
+  void _fetchAndLoadData() async {
+    try {
+      // 1. Call MyRidePendingApiController first
+      debugPrint("📡 [API] Starting MyRidePendingApiController call...");
+      await myRidePendingApiController.myRidePendingApiController();
+      debugPrint("✅ [API] MyRidePendingApiController call completed.");
+
+      // 2. Get ID from AuthController after the first API call
+      debugPrint("🔍 [Auth] Fetching user ID from AuthController...");
+
+    } catch (e, stackTrace) {
+      debugPrint("❌ [Error] Exception in _fetchAndLoadData: $e");
+      debugPrint("📜 [StackTrace] $stackTrace");
+      Get.snackbar("Error", "Failed to load data: $e");
+    }
+  }
 @override
   void initState() {
     // TODO: implement initState
   uiController;
+  _fetchAndLoadData();
     super.initState();
   }
   // --------------------------------------------------

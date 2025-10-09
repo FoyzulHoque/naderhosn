@@ -9,7 +9,7 @@ import '../widget/background_image_for_location.dart';
 
 class AddLocationScreen extends StatelessWidget {
    AddLocationScreen({super.key});
-  BottomNavUserController bottomNavUserController=Get.put(BottomNavUserController());
+  final BottomNavUserController bottomNavUserController=Get.put(BottomNavUserController());
 
   @override
   Widget build(BuildContext context) {

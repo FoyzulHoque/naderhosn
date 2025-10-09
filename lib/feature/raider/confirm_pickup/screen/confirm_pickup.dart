@@ -9,7 +9,6 @@ import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet3.dar
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet4.dart';
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet5.dart';
 
-import '../controler/my_ride_pending_api_controller.dart';
 
 
 class ConfirmPickUpScreen extends StatefulWidget {

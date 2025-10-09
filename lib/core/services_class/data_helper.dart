@@ -69,4 +69,9 @@ class AuthController {
     userModel = null;
     accessKey = null;
   }
+  static Future<void> idClear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    accessKey = null;
+  }
 }
