@@ -10,10 +10,20 @@ import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet4.dar
 import 'package:naderhosn/feature/raider/confirm_pickup/widget/bottom_sheet5.dart';
 
 
-class ConfirmPickUpScreen extends StatelessWidget {
-  final ConfirmPickupController controller = Get.put(ConfirmPickupController());
+
+class ConfirmPickUpScreen extends StatefulWidget {
 
   ConfirmPickUpScreen({super.key});
+
+  @override
+  State<ConfirmPickUpScreen> createState() => _ConfirmPickUpScreenState();
+}
+
+class _ConfirmPickUpScreenState extends State<ConfirmPickUpScreen> {
+  final ConfirmPickupController controller = Get.put(ConfirmPickupController());
+  // final MyRidePendingApiController myRidePendingApiController=Get.find<MyRidePendingApiController>();
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +118,7 @@ class ConfirmPickUpScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget buildBottomSheet(int value) {
     switch (value) {
       case 1:

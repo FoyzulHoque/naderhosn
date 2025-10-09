@@ -26,11 +26,6 @@ class FaresController extends GetxController {
         return;
       }
 
-      Map<String, String> headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-
       NetworkResponse response = await NetworkCall.getRequest(
         url: NetworkPath.getCurrentFare,
         // now it works

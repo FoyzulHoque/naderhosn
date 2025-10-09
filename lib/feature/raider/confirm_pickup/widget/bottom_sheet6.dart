@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:naderhosn/core/services_class/data_helper.dart'; // Assuming AuthController is here
 import 'package:naderhosn/core/style/global_text_style.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,16 +19,17 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
   // 1. Controller Initializations
   final ConfirmPickupController controller = Get.put(ConfirmPickupController());
   final DriverInfoApiController driverInfoApiController = Get.put(DriverInfoApiController());
-  // NOTE: ChooseTaxiApiController removed from here.
+  //final MyRidePendingApiController myRidePendingApiController = Get.put(MyRidePendingApiController());
 
   String transportId = ''; // State variable to hold the ID (Car Transport ID or Rider ID)
 
-  // ✅ FIX 1: Corrected the clearing function to reset the Rx variable in the controller.
+  // Clear driver info function
   void clearDriverInfo() {
     // Reset the Observable variable in the controller to null or an empty model instance
     driverInfoApiController.rideData.value = null;
     driverInfoApiController.isLoading.value = false;
     transportId = ''; // Also clear the local state ID
+    AuthController.idClear();
     debugPrint("🗑️ Driver info cleared and state reset.");
   }
 
@@ -35,32 +37,43 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
   void initState() {
     super.initState();
     debugPrint("🚗 ExpandedBottomSheet6 initState started...");
-
-    // Start the process of finding the ID and fetching data
+    controller; // Keep controller initialization
+    // Start the process of fetching data
     _fetchAndLoadData();
   }
 
-  // Consolidated async method to fetch ID from AuthController and call API safely
+  // Consolidated async method to fetch ID and call APIs in sequence
   void _fetchAndLoadData() async {
-    String? fetchedId;
+    try {
+      // 1. Call MyRidePendingApiController first
+      debugPrint("📡 [API] Starting MyRidePendingApiController call...");
+      // await myRidePendingApiController.myRidePendingApiController();
+      debugPrint("✅ [API] MyRidePendingApiController call completed.");
 
-    // 1. Get ID from AuthController
-    fetchedId = await AuthController.getUserId();
+      // 2. Get ID from AuthController after the first API call
+      debugPrint("🔍 [Auth] Fetching user ID from AuthController...");
+      String? fetchedId = await AuthController.getUserId();
+      debugPrint("✅ [Auth] User ID fetch completed: fetchedId=$fetchedId");
 
-    if (fetchedId != null && fetchedId.isNotEmpty) {
-      transportId = fetchedId; // Update the state variable (used for the initial null check in build)
-      debugPrint("------Auth User ID fetched (used as transportId): $transportId");
+      if (fetchedId != null && fetchedId.isNotEmpty) {
+        transportId = fetchedId; // Update the state variable
+        debugPrint("📌 [State] transportId updated: $transportId");
 
-      // Use Future.microtask to call API safely outside the current build cycle
-      Future.microtask(() {
-        driverInfoApiController.driverInfoApiMethod(transportId);
-      });
-
-    } else {
-      debugPrint("⚠️ Auth User ID is null or empty. Cannot fetch driver info.");
+        // 3. Call DriverInfoApiController only after the above steps
+        Future.microtask(() {
+          debugPrint("📡 [API] Starting DriverInfoApiController call with transportId: $transportId");
+          driverInfoApiController.driverInfoApiMethod(transportId);
+        });
+      } else {
+        debugPrint("⚠️ [Error] Auth User ID is null or empty. Cannot fetch driver info.");
+        Get.snackbar("Error", "User ID not available. Cannot fetch driver info.");
+      }
+    } catch (e, stackTrace) {
+      debugPrint("❌ [Error] Exception in _fetchAndLoadData: $e");
+      debugPrint("📜 [StackTrace] $stackTrace");
+      Get.snackbar("Error", "Failed to load data: $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -81,15 +94,27 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
           child: Obx(() {
             final rideData = driverInfoApiController.rideData.value;
             final driver = rideData?.vehicle?.driver;
+            final vehicle = rideData?.vehicle;
             final isLoading = driverInfoApiController.isLoading.value;
 
-            debugPrint("📡 Obx rebuild: isLoading=$isLoading, rideData=${rideData != null}");
+            debugPrint("📡 [Obx] Rebuild triggered: isLoading=$isLoading, rideData=${rideData != null}");
 
             // The ID used for chat, typically the Car Transport ID from the fetched rideData
             final String idForChat = rideData?.id ?? transportId;
 
+            // Helper function
+            String formatPickupTime(String time24) {
+              try {
+                final parsedTime = DateFormat("HH:mm").parse(time24);
+                return DateFormat.jm().format(parsedTime); // 12-hour format
+              } catch (e) {
+                return time24; // Return original time if parsing fails
+              }
+            }
+
+            // pickupTime variable
             final pickupTime = rideData?.pickupTime != null
-                ? "Pickup at ${rideData!.pickupTime}"
+                ? "Pickup at ${formatPickupTime(rideData!.pickupTime!)}"
                 : "Pickup time not available";
 
             final imageUrl = (driver?.profileImage != null && driver!.profileImage!.isNotEmpty)
@@ -100,7 +125,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
 
             // Check if loading failed and no ID was available
             if (!isLoading && rideData == null && transportId.isEmpty) {
-              debugPrint("❌ rideData is null and no transportId available!");
+              debugPrint("❌ [UI] rideData is null and no transportId available!");
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
@@ -113,7 +138,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
             }
 
             if (isLoading && rideData == null) {
-              debugPrint("⏳ Loading driver info from API...");
+              debugPrint("⏳ [UI] Loading driver info from API...");
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
@@ -141,7 +166,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                     ),
                   ),
 
-                  // ===== Pickup Time and Ride Info Sections (No Change) =====
+                  // ===== Pickup Time and Ride Info Sections =====
                   Align(
                     alignment: Alignment.center,
                     child: Text(
@@ -193,7 +218,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                           flex: 1,
                           child: GestureDetector(
                             onTap: () {
-                              debugPrint("🧭 Option button tapped - switching sheet index.");
+                              debugPrint("🧭 [Action] Option button tapped - switching sheet index.");
                               controller.changeSheet(5);
                             },
                             child: Image.asset(
@@ -210,7 +235,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
 
                   const SizedBox(height: 20),
 
-                  // ===== Driver Info Section (No Change) =====
+                  // ===== Driver Info Section =====
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -243,7 +268,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                                   return const CircularProgressIndicator();
                                 },
                                 errorBuilder: (context, error, stackTrace) {
-                                  debugPrint("❌ Error loading driver image: $error");
+                                  debugPrint("❌ [Image] Error loading driver image: $error");
                                   return Image.asset(
                                     'assets/images/Ellipse 459 (2).png',
                                     height: 60,
@@ -294,10 +319,10 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Image.asset(
-                              "assets/images/car2.png",
-                              height: 40,
-                              width: 40,
+                            Image.network(
+                              "${vehicle?.image ?? "assets/images/car2.png"}",
+                              height: 80,
+                              width: 160,
                               fit: BoxFit.contain,
                             ),
                           ],
@@ -308,7 +333,7 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
 
                   const SizedBox(height: 20),
 
-                  // ===== Chat & Call Buttons Section (No Change) =====
+                  // ===== Chat & Call Buttons Section =====
                   Row(
                     children: [
                       Expanded(
@@ -324,10 +349,11 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                           icon: const Icon(Icons.chat_bubble_outline),
                           label: const Text("Chat"),
                           onPressed: () {
-                            debugPrint("💬 Chat tapped - idForChat=$idForChat");
+                            debugPrint("💬 [Action] Chat tapped - idForChat=$idForChat");
                             if (idForChat.isNotEmpty) {
                               Get.to(() => ChatScreen(carTransportId: idForChat));
                             } else {
+                              debugPrint("❌ [Error] Chat failed: Ride ID not available.");
                               Get.snackbar("Error", "Ride ID is not available for chat.");
                             }
                           },
@@ -337,16 +363,18 @@ class _ExpandedBottomSheet6State extends State<ExpandedBottomSheet6> {
                       GestureDetector(
                         onTap: () async {
                           final phone = driver?.phoneNumber;
-                          debugPrint("📞 Attempting to call: $phone");
+                          debugPrint("📞 [Action] Attempting to call: $phone");
                           if (phone == null || phone.isEmpty) {
+                            debugPrint("❌ [Error] Call failed: Driver's phone number not available.");
                             Get.snackbar("Error", "Driver's phone number is not available.");
                             return;
                           }
                           final uri = Uri.parse("tel:$phone");
                           if (await canLaunchUrl(uri)) {
+                            debugPrint("✅ [Action] Launching phone dialer: $phone");
                             await launchUrl(uri);
                           } else {
-                            debugPrint("❌ Could not open dialer for: $phone");
+                            debugPrint("❌ [Error] Could not open dialer for: $phone");
                             Get.snackbar("Error", "Could not open the phone dialer.");
                           }
                         },

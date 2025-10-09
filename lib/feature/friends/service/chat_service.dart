@@ -1,14 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService {
   late WebSocketChannel _channel;
 
-  void connect(String url, String token) {
-    _channel = WebSocketChannel.connect(Uri.parse(url));
+  Future<void> connect(String url, String token) async {
+    _channel = WebSocketChannel.connect(Uri.parse('$url?token=$token'));
+    await _channel.ready;
     _authenticate(token);
   }
 
@@ -21,8 +20,6 @@ class WebSocketService {
   }
 
   Stream get messages => _channel.stream;
-
-  set onDriverLocationUpdate(Null Function(LatLng position, String label) onDriverLocationUpdate) {}
 
   void sendMessage(String event, Map<String, dynamic> data) {
     final message = jsonEncode({"event": event, ...data});
@@ -38,7 +35,4 @@ class WebSocketService {
     }
     _channel.sink.close();
   }
-
-  void setTransportId(String? transportId) {}
-
 }

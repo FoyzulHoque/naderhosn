@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:naderhosn/core/network_caller/endpoints.dart';
 import 'dart:convert';
 import '../../../../core/services_class/data_helper.dart';
+import '../../../web socket/map_web_socket.dart';
 import '../../../friends/service/chat_service.dart'; // Keep if needed for other functionality
 import '../../confirm_pickup/controler/driver_infor_api_controller.dart';
 
@@ -16,6 +16,8 @@ class PickupAcceptController extends GetxController {
   Get.put(DriverInfoApiController());
   final String googleApiKey = Urls.googleApiKey;
   // FIX: Use Get.find() to retrieve the singleton instance, not create a new one.
+  final MapWebSocketService webSocketService = Get.find<MapWebSocketService>();
+
   final WebSocketService webSocketService = Get.find<WebSocketService>();
 
   // Observable state
@@ -54,7 +56,9 @@ class PickupAcceptController extends GetxController {
   @override
   void onClose() {
     webSocketService.removeLocationUpdateCallback(addMarkerCarAvailable);
-    webSocketService.close(); // Note: Closing the service might affect other active controllers
+    webSocketService.close();
+    AuthController.idClear();
+// Note: Closing the service might affect other active controllers
     super.onClose();
   }
 
