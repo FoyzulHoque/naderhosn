@@ -5,6 +5,9 @@ import 'package:naderhosn/feature/splash_screen/screen/splash_screen.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'feature/friends/controller/chat_controller.dart';
 import 'feature/web socket/map_web_socket.dart';
+import 'feature/friends/service/chat_service.dart';
+import 'feature/raider/end_ride/controler/end_ride_controller.dart';
+import 'feature/raider/pickup_accept/controler/pickup_accept_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +19,7 @@ void main() async {
   Get.put(ChatController());
   Get.put(MapWebSocketService());
 
+  Get.put(WebSocketService());
   // Initialize ScreenUtil
   await ScreenUtil.ensureScreenSize();
 
