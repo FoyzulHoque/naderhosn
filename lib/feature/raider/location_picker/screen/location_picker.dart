@@ -276,13 +276,12 @@ class LocationPicker extends StatelessWidget {
     NetworkResponse response=await NetworkCall.postRequest(url: Urls.pickUpLocation,body: mapBody);
 
     if(response.isSuccess){
-
-      await AuthController.accessToken;
+      await AuthController.getUserData();
+      print("--------------code---------${response.statusCode}");
+      print("-------------Token----------${AuthController.accessToken}");
       print("location find success");
     }else{
       print("${response.statusCode}");
     }
-
-
 }
 }

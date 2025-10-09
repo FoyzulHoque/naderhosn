@@ -6,7 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:naderhosn/core/network_caller/endpoints.dart';
 import 'package:naderhosn/core/services_class/data_helper.dart';
 
-class WebSocketService {
+class MapWebSocketService {
   final String wsUrl = Urls.socketUrl;
   WebSocketChannel? _channel;
   int retryCount = 0;
